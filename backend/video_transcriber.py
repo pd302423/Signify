@@ -16,6 +16,7 @@ from mediapipe.tasks.python import vision
 from typing import Dict, Any, List
 
 import sys
+sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "models"))
 from cslr_inference import CSLRInferenceEngine
 
@@ -101,7 +102,9 @@ class VideoTranscriber:
 
             seq_np = np.array(sequence_frames, dtype=np.float32)
             
+            cslr_res = self.engine.decode_continuous_sequence(seq_np)
             res = self.engine.translate_multilingual_sign_sequence(seq_np, target_lang=target_lang)
+
             final_sentence = cslr_res.get("sentence", "")
             if not final_sentence or final_sentence == ".":
                 final_sentence = res.get("translated_text", "")
@@ -113,7 +116,6 @@ class VideoTranscriber:
                 "recognized_glosses": cslr_res.get("glosses", []),
                 "sentence": final_sentence
             }
-
 
         finally:
             if os.path.exists(temp_file.name):
