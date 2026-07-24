@@ -155,7 +155,7 @@ def convert_video_to_3d_mesh(video_path: str, output_dir: str):
 
                 obj_file_path = os.path.join(obj_dir, f"frame_{frame_idx:04d}.obj")
                 with open(obj_file_path, "w") as f:
-                    f.write(f"# SignFlow 3D Hand Mesh - Frame {frame_idx}\n")
+                    f.write(f"# Signify 3D Hand Mesh - Frame {frame_idx}\n")
                     for v in combined_verts:
                         f.write(f"v {v[0]:.6f} {v[1]:.6f} {v[2]:.6f}\n")
                     for fc in combined_faces:
@@ -177,5 +177,6 @@ def convert_video_to_3d_mesh(video_path: str, output_dir: str):
 
 if __name__ == "__main__":
     video_file = "/home/pd/Downloads/Hi my name is… in ASL (Not a Teacher) #americansignlanguage #signlanguage #aslstudent #asl - Lifestyle with Lola (720p).mp4"
-    out_dir = "/home/pd/Documents/sony-wh100xm6/output_3d_meshes"
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out_dir = os.path.join(repo_root, "output_3d_meshes")
     convert_video_to_3d_mesh(video_file, out_dir)

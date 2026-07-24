@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  signflow-backend:
+  signify-backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: signflow_studio_app
+    container_name: signify_studio_app
     ports:
       - "8000:8000"
     environment:

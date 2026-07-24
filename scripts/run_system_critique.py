@@ -1,5 +1,5 @@
 """
-Comprehensive System Evaluation & Critiquing Runner for SignFlow Studio.
+Comprehensive System Evaluation & Critiquing Runner for Signify Studio.
 Executes live critique passes on hand pose profiles, sequence streams, ASL gloss grammar,
 and validates backend FastAPI routes & inference engines.
 """
@@ -108,7 +108,7 @@ def run_api_endpoint_verifications():
         ("POST", "/critique_gloss", {"glosses": ["YOU", "NAME", "WHAT"]}),
         ("POST", "/translate_text_to_gloss", {"text": "What is your name?"}),
         ("POST", "/translate_gloss_to_english", {"glosses": ["YOU", "NAME", "WHAT"]}),
-        ("POST", "/tts/elevenlabs", {"text": "Hello welcome to SignFlow Studio"}),
+        ("POST", "/tts/elevenlabs", {"text": "Hello welcome to Signify Studio"}),
         ("POST", "/multicam_triangulate", {"cam1_pts": np.random.randn(21, 2).tolist(), "cam2_pts": np.random.randn(21, 2).tolist()}),
         ("GET", "/multilingual_languages", None),
         ("POST", "/translate_multilingual_sign", {"sequence": [np.random.randn(225).tolist() for _ in range(15)], "target_lang": "es"}),

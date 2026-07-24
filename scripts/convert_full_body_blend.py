@@ -11,8 +11,9 @@ import glob
 import bpy
 
 def convert_full_body_obj_to_blend():
-    obj_dir = "/home/pd/Documents/sony-wh100xm6/output_3d_meshes/full_body_obj_frames"
-    blend_output_path = "/home/pd/Documents/sony-wh100xm6/output_3d_meshes/full_body_3d_animation.blend"
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    obj_dir = os.path.join(repo_root, "output_3d_meshes", "full_body_obj_frames")
+    blend_output_path = os.path.join(repo_root, "output_3d_meshes", "full_body_3d_animation.blend")
 
     if not os.path.exists(obj_dir):
         print(f"❌ OBJ directory not found: {obj_dir}")

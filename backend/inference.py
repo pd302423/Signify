@@ -1,5 +1,5 @@
 """
-Inference Engine Wrapper for SignFlow Backend.
+Inference Engine Wrapper for Signify Backend.
 
 Runs real-time scale-invariant single-word gesture classification using the
 Neural Kinematic Embedding Net & Universal Pose Evaluator.

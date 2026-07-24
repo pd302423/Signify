@@ -1,5 +1,5 @@
 """
-Data Preprocessing & MediaPipe Landmark Extraction Module for SignFlow.
+Data Preprocessing & MediaPipe Landmark Extraction Module for Signify.
 
 Extracts normalized 3D keypoint features from raw video frames or camera streams using MediaPipe Holistic.
 Saves extracted landmark sequences to NumPy format (.npy) for model training.

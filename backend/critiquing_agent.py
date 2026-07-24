@@ -1,5 +1,5 @@
 """
-Universal Critiquing Agent for SignFlow Studio.
+Universal Critiquing Agent for Signify Studio.
 
 Performs scale-invariant, anatomically normalized, temporal, and grammatical critique on:
 1. 2D/3D Hand Poses & Joint Flexion Angles

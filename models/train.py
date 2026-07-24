@@ -1,5 +1,5 @@
 """
-Training Pipeline for SignFlow PyTorch Models.
+Training Pipeline for Signify PyTorch Models.
 
 Generates realistic kinematic landmark datasets based on anatomical ASL sign profiles,
 trains Bidirectional LSTM and CTC models, and exports trained weights & labels.
@@ -110,7 +110,7 @@ class RealisticBiometricLandmarkDataset(Dataset):
 def train_models(weights_dir: str = "weights"):
     os.makedirs(weights_dir, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"🚀 Training SignFlow PyTorch Models on {device}...")
+    print(f"🚀 Training Signify PyTorch Models on {device}...")
 
     # 1. Train DynamicLandmarkLSTM Model
     dataset = RealisticBiometricLandmarkDataset(num_samples=800, seq_len=30, feature_dim=225, num_classes=len(DEFAULT_CLASSES))

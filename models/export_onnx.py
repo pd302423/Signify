@@ -1,5 +1,5 @@
 """
-ONNX Model Export Script for SignFlow.
+ONNX Model Export Script for Signify.
 
 Exports trained PyTorch state_dict models to ONNX format for accelerated browser & backend deployment.
 """
@@ -77,7 +77,7 @@ def export_cslr_to_onnx(model_path: str, output_onnx: str, seq_len: int = 90, fe
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Export SignFlow PyTorch Model to ONNX format")
+    parser = argparse.ArgumentParser(description="Export Signify PyTorch Model to ONNX format")
     parser.add_argument("--input-model", type=str, default="weights/sign_lstm.pth")
     parser.add_argument("--output-onnx", type=str, default="weights/sign_lstm.onnx")
     parser.add_argument("--cslr-onnx", type=str, default="weights/cslr_bilstm.onnx")

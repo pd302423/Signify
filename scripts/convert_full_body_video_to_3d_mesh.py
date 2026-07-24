@@ -206,5 +206,6 @@ def convert_full_body_video_to_3d_mesh(video_path: str, output_dir: str):
 
 if __name__ == "__main__":
     video_file = "/home/pd/Downloads/Hi my name is… in ASL (Not a Teacher) #americansignlanguage #signlanguage #aslstudent #asl - Lifestyle with Lola (720p).mp4"
-    out_dir = "/home/pd/Documents/sony-wh100xm6/output_3d_meshes"
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out_dir = os.path.join(repo_root, "output_3d_meshes")
     convert_full_body_video_to_3d_mesh(video_file, out_dir)

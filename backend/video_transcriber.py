@@ -1,5 +1,5 @@
 """
-Video Transcriber Module for SignFlow Studio.
+Video Transcriber Module for Signify Studio.
 
 Ingests recorded or uploaded video files (.mp4, .webm, .mov, .avi),
 normalizes video resolution/aspect ratio and applies scale & wrist-centered landmark normalization,

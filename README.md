@@ -1,9 +1,9 @@
-# SignFlow Studio — Peak AI Sign Language Platform
+# Signify Studio — Peak AI Sign Language Platform
 
-![SignFlow Status](https://img.shields.io/badge/Status-Peak%20Platform-success?style=for-the-badge)
+![Signify Status](https://img.shields.io/badge/Status-Peak%20Platform-success?style=for-the-badge)
 ![Tech Stack](https://img.shields.io/badge/Stack-MediaPipe%20%2B%20PyTorch%20%2B%20FastAPI%20%2B%20Three.js%20%2B%20WebSpeech-blueviolet?style=for-the-badge)
 
-SignFlow Studio is a peak, full-spectrum AI Sign Language platform combining **Continuous Recognition (CSLR)**, **Reverse 3D Avatar Production (SLP)**, **Live Voice-to-3D Sign Dictation**, **Joint Flexion Spatial Inspector**, and **Gamified ASL Pose Trainer**.
+Signify Studio is a peak, full-spectrum AI Sign Language platform combining **Continuous Recognition (CSLR)**, **Reverse 3D Avatar Production (SLP)**, **Live Voice-to-3D Sign Dictation**, **Joint Flexion Spatial Inspector**, and **Gamified ASL Pose Trainer**.
 
 ---
 

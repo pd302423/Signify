@@ -1,5 +1,5 @@
 """
-FastAPI Backend Server & Static Host for SignFlow Sign Language Recognition.
+FastAPI Backend Server & Static Host for Signify Sign Language Recognition.
 
 Includes:
 - EasyMocap Multi-Camera 3D Mocap Adapter (/predict_easymocap)
@@ -32,7 +32,7 @@ from multicam_smplx_hand import MultiCameraStereoTriangulator, MANOParametricHan
 from easymocap_integration import EasyMocapAdapter
 
 app = FastAPI(
-    title="SignFlow Multi-Camera & EasyMocap SLR API",
+    title="Signify Multi-Camera & EasyMocap SLR API",
     description="Multi-Camera Stereo 3D Hand Mesh (EasyMocap / MANO / SMPL-X) & Real-Time SLR API with Universal Critiquing Agent and ElevenLabs TTS",
     version="2.3.0"
 )
@@ -61,7 +61,7 @@ video_transcriber = VideoTranscriber(cslr_engine)
 def health_check():
     return {
         "status": "online",
-        "system": "SignFlow Multi-Camera & Universal Critiquing Engine",
+        "system": "Signify Multi-Camera & Universal Critiquing Engine",
         "version": "2.3.0",
         "features": [
             "ElevenLabs Neural Text-to-Speech",

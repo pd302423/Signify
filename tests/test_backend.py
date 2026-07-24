@@ -1,5 +1,5 @@
 """
-Automated pytest test suite for SignFlow Studio API & Inference Engine.
+Automated pytest test suite for Signify Studio API & Inference Engine.
 """
 
 import sys
