@@ -4,3 +4,8 @@ __pycache__/
 .DS_Store
 *.swp
 *.tmp
+
+# Ignore generated 3D OBJ mesh frame sequences and blend files
+output_3d_meshes/full_body_obj_frames/
+output_3d_meshes/obj_frames/
+output_3d_meshes/*.blend
