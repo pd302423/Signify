@@ -102,15 +102,18 @@ class VideoTranscriber:
             seq_np = np.array(sequence_frames, dtype=np.float32)
             
             res = self.engine.translate_multilingual_sign_sequence(seq_np, target_lang=target_lang)
-            cslr_res = self.engine.decode_continuous_sequence(seq_np)
+            final_sentence = cslr_res.get("sentence", "")
+            if not final_sentence or final_sentence == ".":
+                final_sentence = res.get("translated_text", "")
 
             return {
                 "status": "success",
                 "frame_count": len(sequence_frames),
                 "translation_result": res,
                 "recognized_glosses": cslr_res.get("glosses", []),
-                "sentence": res.get("translated_text", cslr_res.get("sentence", ""))
+                "sentence": final_sentence
             }
+
 
         finally:
             if os.path.exists(temp_file.name):

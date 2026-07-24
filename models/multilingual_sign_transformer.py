@@ -163,10 +163,11 @@ class MultiLingualSignTransformer(nn.Module):
                 prob = F.softmax(out[:, -1, :], dim=-1)
                 next_word_id = torch.argmax(prob, dim=-1).item()
                 
-                if next_word_id == eos_id or (ys.shape[1] > 1 and next_word_id == ys[0, -1].item()):
-                    # Break on EOS or immediate token repetition to avoid loops
+                # Stop on EOS or if token repeats in sequence to prevent loops
+                if next_word_id == eos_id or next_word_id in ys[0].tolist():
                     break
                 ys = torch.cat([ys, torch.tensor([[next_word_id]], dtype=torch.long, device=src_seq.device)], dim=1)
+
             
             token_ids = ys[0].tolist()[1:]  # Exclude SOS
             words = [self.vocab[i] for i in token_ids if i < len(self.vocab)]
