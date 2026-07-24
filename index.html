@@ -3,40 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignFlow — Dual Hand & 25 Sign ASL Platform</title>
+    <title>SignFlow Studio — Multi-Lingual AI Sign Language Platform</title>
     
     <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Three.js CDN for 3D Sign Avatar Renderer -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
 
     <!-- MediaPipe Libraries from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    
-    <!-- ONNX Runtime Web for Client-Side WASM / WebGPU Accelerated Inference -->
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-
 
     <style>
         :root {
-            --bg: #0b0c0e;
-            --surface: #14161b;
+            --bg: #090a0f;
+            --surface: #12151e;
+            --surface-card: rgba(18, 21, 30, 0.75);
             --border: rgba(255, 255, 255, 0.08);
-            --border-focus: rgba(255, 255, 255, 0.2);
+            --border-hover: rgba(56, 189, 248, 0.3);
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
             --text-muted: #6b7280;
-            --accent-light: #38bdf8;
-            --success: #10b981;
-            --warning: #f59e0b;
+            --accent-cyan: #38bdf8;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
@@ -55,50 +52,62 @@
             display: flex;
             flex-direction: column;
             -webkit-font-smoothing: antialiased;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
         }
 
         header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 1.25rem 2rem;
+            padding: 1rem 2rem;
             border-bottom: 1px solid var(--border);
-            background: var(--bg);
+            background: rgba(9, 10, 15, 0.85);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.85rem;
             text-decoration: none;
             color: var(--text-primary);
         }
 
         .brand-icon {
-            width: 26px;
-            height: 26px;
-            border: 1.5px solid var(--text-primary);
-            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
         }
 
         .brand-name {
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #fff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .system-tabs {
             display: flex;
-            background: var(--surface);
+            background: rgba(18, 21, 30, 0.8);
             border: 1px solid var(--border);
-            padding: 3px;
-            border-radius: 8px;
+            padding: 4px;
+            border-radius: 10px;
             gap: 4px;
         }
 
@@ -108,28 +117,39 @@
             color: var(--text-secondary);
             font-size: 0.85rem;
             font-weight: 500;
-            padding: 0.4rem 1rem;
-            border-radius: 6px;
+            padding: 0.5rem 1.1rem;
+            border-radius: 7px;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .tab-btn.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(139, 92, 246, 0.15));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .main-content {
-            max-width: 1280px;
+            max-width: 1380px;
             width: 100%;
-            margin: 2rem auto;
+            margin: 1.5rem auto;
             padding: 0 1.5rem;
             flex: 1;
         }
 
         .system-view {
             display: none;
-            grid-template-columns: 1.2fr 0.8fr;
+            grid-template-columns: 1.15fr 0.85fr;
             gap: 1.5rem;
         }
 
@@ -137,19 +157,25 @@
             display: grid;
         }
 
-        @media (max-width: 960px) {
+        @media (max-width: 1024px) {
             .system-view {
                 grid-template-columns: 1fr;
             }
         }
 
         .card {
-            background: var(--surface);
+            background: var(--surface-card);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 1.25rem;
             display: flex;
             flex-direction: column;
+            transition: border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
         }
 
         .card-header {
@@ -160,11 +186,14 @@
         }
 
         .card-title {
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .status-badge {
@@ -174,6 +203,10 @@
             font-size: 0.75rem;
             font-family: var(--font-mono);
             color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
         }
 
         .status-dot {
@@ -182,7 +215,10 @@
             border-radius: 50%;
             background: var(--text-muted);
         }
-        .status-dot.active { background: var(--success); }
+        .status-dot.active { 
+            background: var(--accent-emerald); 
+            box-shadow: 0 0 8px var(--accent-emerald);
+        }
 
         .source-selector-bar {
             display: flex;
@@ -194,6 +230,7 @@
         .input-row {
             display: flex;
             gap: 0.5rem;
+            align-items: center;
         }
 
         .select-input {
@@ -201,10 +238,17 @@
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border);
             color: var(--text-primary);
+            font-family: var(--font-sans);
             font-size: 0.85rem;
-            padding: 0.5rem 0.75rem;
+            padding: 0.55rem 0.75rem;
             border-radius: 8px;
             outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .select-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
         }
 
         .viewport {
@@ -212,9 +256,10 @@
             width: 100%;
             aspect-ratio: 16 / 9;
             background: #000;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             border: 1px solid var(--border);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
         video {
@@ -252,14 +297,14 @@
         }
 
         .stat-tag {
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
+            background: rgba(9, 10, 15, 0.8);
+            backdrop-filter: blur(6px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-secondary);
             font-family: var(--font-mono);
             font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
         }
 
         .btn-toolbar {
@@ -276,10 +321,10 @@
             font-family: var(--font-sans);
             font-size: 0.85rem;
             font-weight: 500;
-            padding: 0.5rem 1rem;
+            padding: 0.55rem 1.1rem;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
@@ -287,42 +332,45 @@
 
         .btn:hover {
             background: rgba(255, 255, 255, 0.08);
-            border-color: var(--border-focus);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
         }
 
         .btn-primary {
-            background: var(--text-primary);
-            color: var(--bg);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: #fff;
             border: none;
             font-weight: 600;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
         }
 
         .btn-primary:hover {
-            background: #e5e7eb;
+            opacity: 0.92;
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.35);
         }
 
         .reader-output {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.25rem;
+            border-radius: 10px;
+            padding: 1.1rem;
             margin-bottom: 1rem;
         }
 
         .current-sign-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             margin-bottom: 0.25rem;
         }
 
         .current-sign-val {
-            font-size: 2.25rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
             color: var(--text-primary);
-            min-height: 50px;
+            min-height: 48px;
             display: flex;
             align-items: center;
         }
@@ -336,17 +384,17 @@
 
         .progress-bar {
             flex: 1;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
             width: 0%;
-            background: var(--accent-light);
-            transition: width 0.2s ease;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+            transition: width 0.25s ease;
         }
 
         .confidence-num {
@@ -358,9 +406,9 @@
         }
 
         .transcript-box {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.35);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 1rem;
             margin-bottom: 1rem;
             display: flex;
@@ -372,8 +420,8 @@
             font-family: var(--font-mono);
             font-size: 0.95rem;
             color: var(--text-primary);
-            min-height: 80px;
-            max-height: 120px;
+            min-height: 70px;
+            max-height: 110px;
             overflow-y: auto;
             line-height: 1.5;
         }
@@ -382,7 +430,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 0.4rem;
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
             margin-top: 0.5rem;
             padding: 0.5rem;
@@ -395,17 +443,57 @@
             font-size: 0.75rem;
             font-family: var(--font-mono);
             color: var(--text-secondary);
-            padding: 0.3rem 0.5rem;
+            padding: 0.35rem 0.6rem;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 4px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             gap: 0.4rem;
+            transition: all 0.15s ease;
         }
         .gesture-item.active {
             background: rgba(56, 189, 248, 0.15);
-            color: var(--accent-light);
+            color: var(--accent-cyan);
             border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        /* Joint Flexion Inspector Gauges */
+        .flexion-inspector-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .flexion-card {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.4rem;
+            text-align: center;
+        }
+
+        .flexion-title {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .flexion-val {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-top: 0.2rem;
+        }
+
+        /* 3D Avatar Canvas */
+        #avatar_canvas {
+            width: 100%;
+            height: 340px;
+            border-radius: 10px;
+            background: #050608;
+            border: 1px solid var(--border);
         }
     </style>
 </head>
@@ -415,27 +503,26 @@
     <header>
         <a href="#" class="brand">
             <div class="brand-icon">S</div>
-            <span class="brand-name">SignFlow Studio (Dual Hand & 25 Signs)</span>
+            <span class="brand-name">SignFlow Studio (Multi-Lingual AI)</span>
         </a>
 
         <div class="system-tabs">
-            <button id="tab_sys1" class="tab-btn active" onclick="switchSystem(1)">1. Camera SLR (CSLR)</button>
-            <button id="tab_sys3" class="tab-btn" onclick="switchSystem(3)">2. Intelligent Sign NLP & Translation</button>
-            <button id="tab_sys4" class="tab-btn" onclick="switchSystem(4)">3. 🤖 Universal Critiquing Agent</button>
+            <button id="tab_sys1" class="tab-btn active" onclick="switchSystem(1)">🎥 Multi-Lingual Sign Reader</button>
+            <button id="tab_sys2" class="tab-btn" onclick="switchSystem(2)">🤖 3D Sign Avatar Studio</button>
+            <button id="tab_sys4" class="tab-btn" onclick="switchSystem(4)">🎓 AI Critiquing & Pose Trainer</button>
+            <button id="tab_sys3" class="tab-btn" onclick="switchSystem(3)">🧠 Neural NLP Studio</button>
         </div>
-
-
     </header>
 
     <!-- Main Workspace -->
     <main class="main-content">
         
-        <!-- SYSTEM 1: USB Camera Sign Recognition -->
+        <!-- SYSTEM 1: Multi-Lingual USB Camera Sign Recognition & SLT -->
         <div id="system_1_view" class="system-view active">
             
             <section class="card">
                 <div class="card-header">
-                    <span class="card-title">USB Camera Video Input (Dual Hand Active)</span>
+                    <span class="card-title">🎥 Live Multi-Lingual Sign Language Stream</span>
                     <div class="status-badge">
                         <span id="status_dot" class="status-dot"></span>
                         <span id="status_label">Standby</span>
@@ -445,16 +532,37 @@
                 <div class="source-selector-bar">
                     <div class="input-row">
                         <select id="camera_device_select" class="select-input">
-                            <option value="default">Default USB / Phone Camera</option>
+                            <option value="default">Default USB / Web Camera</option>
                         </select>
-                        <button class="btn" onclick="populateCameraDevices()" style="font-size: 0.75rem;">Refresh Cameras</button>
+                        <button class="btn" onclick="populateCameraDevices()" style="font-size: 0.75rem;">Refresh</button>
+                    </div>
+
+                    <!-- Multi-Lingual Selector Bar -->
+                    <div class="input-row" style="margin-top: 0.4rem;">
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap;">🌐 Sign Language:</span>
+                        <select id="sign_language_select" class="select-input" style="font-size: 0.8rem; padding: 0.35rem;" onchange="onLanguageSelectionChange()">
+                            <option value="ASL">ASL (American Sign Language)</option>
+                            <option value="BSL">BSL (British Sign Language)</option>
+                            <option value="ISL">ISL (Indian Sign Language)</option>
+                            <option value="CSL">CSL (Chinese Sign Language)</option>
+                            <option value="DGS">DGS (German Sign Language)</option>
+                        </select>
+
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap;">🗣️ Target Spoken:</span>
+                        <select id="target_language_select" class="select-input" style="font-size: 0.8rem; padding: 0.35rem;">
+                            <option value="en">English (US/UK)</option>
+                            <option value="es">Spanish (Español)</option>
+                            <option value="hi">Hindi (हिन्दी)</option>
+                            <option value="zh">Mandarin (中文)</option>
+                            <option value="de">German (Deutsch)</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="viewport">
                     <div class="viewport-stats">
                         <span class="stat-tag">FPS: <span id="fps_val">0</span></span>
-                        <span class="stat-tag">Tracking: <span id="landmarks_val">0 Hands</span></span>
+                        <span class="stat-tag">Hands: <span id="landmarks_val">0</span></span>
                     </div>
 
                     <video id="webcam_feed" playsinline muted></video>
@@ -462,19 +570,31 @@
                 </div>
 
                 <div class="btn-toolbar">
-                    <button id="btn_start" class="btn btn-primary">Start USB Camera</button>
+                    <button id="btn_start" class="btn btn-primary">Start Camera</button>
                     <button id="btn_stop" class="btn" style="display: none;">Stop Camera</button>
+                </div>
+
+                <!-- Spatial Joint Flexion Inspector -->
+                <div style="margin-top: 1rem;">
+                    <span class="card-title" style="font-size: 0.72rem;">📐 Spatial Joint Flexion Inspector</span>
+                    <div class="flexion-inspector-grid">
+                        <div class="flexion-card"><div class="flexion-title">Thumb</div><div id="flex_thumb" class="flexion-val">0°</div></div>
+                        <div class="flexion-card"><div class="flexion-title">Index</div><div id="flex_index" class="flexion-val">0°</div></div>
+                        <div class="flexion-card"><div class="flexion-title">Middle</div><div id="flex_middle" class="flexion-val">0°</div></div>
+                        <div class="flexion-card"><div class="flexion-title">Ring</div><div id="flex_ring" class="flexion-val">0°</div></div>
+                        <div class="flexion-card"><div class="flexion-title">Pinky</div><div id="flex_pinky" class="flexion-val">0°</div></div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Right: 25 Signs Reader & Index -->
+            <!-- Right: Real-Time Translation Reader -->
             <section class="card">
                 <div class="card-header">
-                    <span class="card-title">Real-Time Precision Reader</span>
+                    <span class="card-title">⚡ Multi-Lingual Sign Translation Output</span>
                 </div>
 
                 <div class="reader-output">
-                    <div class="current-sign-label">Recognized Sign</div>
+                    <div class="current-sign-label">Recognized Sign Gesture</div>
                     <div id="sign_val" class="current-sign-val" style="color: var(--text-muted);">NO HAND DETECTED</div>
 
                     <div class="confidence-row">
@@ -487,38 +607,31 @@
 
                 <div class="transcript-box">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                        <div style="font-size: 0.75rem; color: var(--accent-light); text-transform: uppercase; font-weight: 600;">⚡ Real-Time Continuous Sentence Streamer</div>
-                        <span id="streamer_status_tag" style="font-size: 0.7rem; background: rgba(56, 189, 248, 0.15); color: var(--accent-light); padding: 0.1rem 0.4rem; border-radius: 4px;">Live Streaming</span>
+                        <div style="font-size: 0.75rem; color: var(--accent-cyan); text-transform: uppercase; font-weight: 600;">⚡ Real-Time Continuous Sentence Streamer</div>
+                        <span id="streamer_status_tag" style="font-size: 0.7rem; background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); padding: 0.1rem 0.4rem; border-radius: 4px;">Live Streaming</span>
                     </div>
-                    <div id="transcript_val" class="transcript-content" style="font-size: 1.1rem; color: var(--text-primary);">Perform 1-hand or 2-hand signs continuously... sentence forms as you sign!</div>
+                    <div id="transcript_val" class="transcript-content" style="font-size: 1.05rem; color: var(--text-primary);">Perform 1-hand or 2-hand signs continuously... sentence forms in real-time!</div>
                     <div id="live_gloss_chips" style="display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.4rem;"></div>
 
                     <div style="border-top: 1px solid var(--border); padding-top: 0.6rem; margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <!-- ElevenLabs Settings Toolbar -->
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <span style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap;">🗣️ ElevenLabs Voice:</span>
+                            <span style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">🗣️ ElevenLabs Voice:</span>
                             <select id="elevenlabs_voice_select" class="select-input" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
                                 <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Calm Female)</option>
                                 <option value="pNInz6obpgDQGcFmaJgB">Adam (Deep Male)</option>
                                 <option value="ErXwobaYiN019PkySvjV">Antoni (Expressive Male)</option>
                                 <option value="EXAVITQu4vr4xnSDxMaL">Bella (Friendly Female)</option>
                                 <option value="AZnzlk1XvdvUeBnXmlld">Domi (Energetic Female)</option>
-                                <option value="MF3mGyEYCl7XYWbV9V6O">Elli (Warm Female)</option>
-                                <option value="TxGEqnHWrfWFTfGW9XjX">Josh (Casual Male)</option>
                             </select>
                         </div>
 
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="password" id="elevenlabs_api_key_input" class="select-input" style="font-size: 0.75rem; padding: 0.3rem; flex: 1;" placeholder="Paste ElevenLabs API Key (Optional)...">
-                        </div>
-
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <label style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;">
-                                <input type="checkbox" id="elevenlabs_auto_speak" checked style="accent-color: var(--accent-light);"> Auto ElevenLabs Speech
+                            <label style="font-size: 0.78rem; color: var(--text-secondary); cursor: pointer;">
+                                <input type="checkbox" id="elevenlabs_auto_speak" checked style="accent-color: var(--accent-cyan);"> Auto Neural Voice Speech
                             </label>
                             <div style="display: flex; gap: 0.4rem;">
                                 <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="clearTranscript()">Clear</button>
-                                <button class="btn btn-primary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="speakSentenceElevenLabs()">🔊 ElevenLabs Speak</button>
+                                <button class="btn btn-primary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="speakSentenceElevenLabs()">🔊 Speak</button>
                             </div>
                         </div>
                     </div>
@@ -526,67 +639,66 @@
 
                 <!-- 25 Top ASL Signs Reference Index -->
                 <div>
-                    <span class="card-title" style="font-size: 0.75rem;">Supported 25 ASL Hand Signs (1-Hand & 2-Hand)</span>
+                    <span class="card-title" style="font-size: 0.72rem;">Supported Sign Gesture Classes</span>
                     <div id="gestures_grid" class="gestures-grid"></div>
                 </div>
             </section>
-
         </div>
 
-        <!-- PHASE 3: Intelligent Sign NLP & Translation Studio -->
-        <div id="system_3_view" class="system-view">
+        <!-- SYSTEM 2: 3D Avatar & Speech Dictation Studio -->
+        <div id="system_2_view" class="system-view">
             <section class="card">
                 <div class="card-header">
-                    <span class="card-title">🎙️ English → ASL Gloss Translation Engine</span>
-                    <span class="status-badge"><span class="status-dot active"></span> Phase 3 NLP Active</span>
-                </div>
-                
-                <div class="input-row" style="margin-bottom: 1rem;">
-                    <input type="text" id="nlp_english_input" class="select-input" style="font-size: 1rem; padding: 0.75rem;" value="Where is your house?">
-                    <button class="btn btn-primary" onclick="runTextToGlossNLP()">Translate to ASL</button>
-                    <button class="btn" onclick="startMicNLPInput()">🎙️ Mic Input</button>
+                    <span class="card-title">🤖 Three.js 3D Skeletal Sign Avatar</span>
+                    <span class="status-badge"><span class="status-dot active"></span> 60 FPS WebGL</span>
                 </div>
 
-                <div class="reader-output" style="margin-bottom: 1rem;">
-                    <div class="current-sign-label">Target ASL Gloss Sequence</div>
-                    <div id="nlp_gloss_output" class="current-sign-val" style="font-size: 1.25rem; color: var(--accent-light);">HOUSE • YOU • WHERE</div>
+                <div id="avatar_canvas_container" style="position: relative;">
+                    <div id="avatar_canvas"></div>
                 </div>
 
-                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem;">
-                    <span class="card-title" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Linguistic Grammar Rules Applied:</span>
-                    <ul id="asl_grammar_rules_list" style="font-size: 0.85rem; color: var(--text-secondary); list-style-type: square; padding-left: 1.25rem; line-height: 1.5;">
-                        <li>Dropped copula verb "is" and possessive article.</li>
-                        <li>WH-question word "WHERE" shifted to sentence end (ASL Topic-Comment order).</li>
-                    </ul>
+                <div class="input-row" style="margin-top: 1rem;">
+                    <span style="font-size: 0.78rem; color: var(--text-secondary);">Animation Speed:</span>
+                    <button class="btn" onclick="setAvatarSpeed(0.5)">0.5x</button>
+                    <button class="btn" onclick="setAvatarSpeed(1.0)">1.0x</button>
+                    <button class="btn" onclick="setAvatarSpeed(1.5)">1.5x</button>
+                    <button class="btn" onclick="setAvatarSpeed(2.0)">2.0x</button>
                 </div>
             </section>
 
             <section class="card">
                 <div class="card-header">
-                    <span class="card-title">🤟 ASL Gloss Sequence → Natural English Sentence</span>
+                    <span class="card-title">🎙️ Live Voice Microphone Dictation to 3D Avatar</span>
                 </div>
 
-                <div class="input-row" style="margin-bottom: 1rem;">
-                    <input type="text" id="nlp_gloss_input" class="select-input" style="font-size: 1rem; padding: 0.75rem;" value="ME WANT WATER">
-                    <button class="btn btn-primary" onclick="runGlossToEnglishNLP()">Translate to English</button>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem;">
+                    <label style="font-size: 0.78rem; color: var(--text-secondary);">Type or speak English text to animate 3D avatar:</label>
+                    <div class="input-row">
+                        <input type="text" id="avatar_text_input" class="select-input" style="font-size: 0.95rem; padding: 0.65rem;" value="Hello friend welcome to SignFlow">
+                        <button class="btn btn-primary" onclick="dictateTextTo3DAvatar()">🎬 Animate</button>
+                        <button class="btn" onclick="startMicAvatarInput()">🎙️ Mic Dictate</button>
+                    </div>
                 </div>
 
-                <div class="reader-output" style="margin-bottom: 1rem;">
-                    <div class="current-sign-label">Translated English Sentence</div>
-                    <div id="nlp_english_output" class="current-sign-val" style="font-size: 1.25rem; color: var(--success);">I would like some water.</div>
+                <div class="reader-output">
+                    <div class="current-sign-label">Generated Sign Gloss Sequence</div>
+                    <div id="gloss_sequence_out" class="current-sign-val" style="font-size: 1.15rem; color: var(--accent-cyan);">HELLO • FRIEND • WELCOME</div>
                 </div>
 
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                    <button class="btn" onclick="speakNLPEnglishResult()">🔊 Text-to-Speech</button>
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem;">
+                    <span class="card-title" style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem; display: block;">3D Avatar Controls</span>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;">
+                        Drag mouse on 3D canvas to orbit perspective. Scroll to zoom camera. Real-time forward kinematics drive shoulder, elbow, wrist, and finger joints.
+                    </p>
                 </div>
             </section>
         </div>
 
-        <!-- SYSTEM 4: Universal AI Critiquing Agent Studio -->
+        <!-- SYSTEM 4: Universal AI Critiquing & Pose Trainer Studio -->
         <div id="system_4_view" class="system-view">
             <section class="card">
                 <div class="card-header">
-                    <span class="card-title">🤖 Live Visual Pose & Spatial Inspector</span>
+                    <span class="card-title">🤖 Live Pose & Spatial Alignment Inspector</span>
                     <div class="status-badge">
                         <span id="critique_status_dot" class="status-dot active"></span>
                         <span id="critique_status_label">Critiquing Engine Active</span>
@@ -595,7 +707,7 @@
 
                 <div class="source-selector-bar">
                     <div class="input-row">
-                        <label style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Target ASL Sign Benchmark:</label>
+                        <label style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500;">Target Sign Benchmark:</label>
                         <select id="critique_target_select" class="select-input" onchange="triggerPoseCritique()">
                             <option value="PEACE">✌️ Peace / V-Sign</option>
                             <option value="OPEN HAND">🖐️ Open Hand / Five</option>
@@ -612,52 +724,51 @@
                     </div>
                 </div>
 
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
-                    <div id="critique_target_desc" style="font-size: 0.85rem; color: var(--accent-light); font-weight: 500;">
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem; margin-top: 0.5rem;">
+                    <div id="critique_target_desc" style="font-size: 0.82rem; color: var(--accent-cyan); font-weight: 500;">
                         Target Form: Index and Middle fingers extended straight up, Ring and Pinky curled into palm.
                     </div>
                 </div>
 
-                <div style="margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
-                    <span class="card-title" style="font-size: 0.8rem; margin-bottom: 0.75rem; display: block;">📜 ASL Sentence & Grammar Critiquing Tool</span>
+                <div style="margin-top: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+                    <span class="card-title" style="font-size: 0.78rem; margin-bottom: 0.75rem; display: block;">📜 ASL Sentence Grammar Validator</span>
                     <div class="input-row" style="margin-bottom: 0.75rem;">
                         <input type="text" id="critique_gloss_input" class="select-input" value="WHAT YOUR NAME" placeholder="Enter ASL Glosses (e.g. WHAT YOUR NAME)">
-                        <button class="btn btn-primary" onclick="runGlossGrammarCritique()">Critique Grammar</button>
+                        <button class="btn btn-primary" onclick="runGlossGrammarCritique()">Validate Grammar</button>
                     </div>
                     <div id="gloss_critique_result_box" style="display: block; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; font-size: 0.85rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
                             <span style="font-weight: 600; color: var(--text-primary);" id="gloss_critique_verdict">Valid ASL Grammar</span>
-                            <span style="font-family: var(--font-mono); color: var(--accent-light);" id="gloss_critique_score">100.0%</span>
+                            <span style="font-family: var(--font-mono); color: var(--accent-cyan);" id="gloss_critique_score">100.0%</span>
                         </div>
                         <div id="gloss_critique_details" style="color: var(--text-secondary);">WH-word is correctly positioned at sentence end.</div>
                     </div>
                 </div>
             </section>
 
-            <!-- Right: Real-Time AI Critique Report & Finger Flexion Table -->
+            <!-- Right: Real-Time AI Critique Diagnosis -->
             <section class="card">
                 <div class="card-header">
                     <span class="card-title">Real-Time AI Critique Diagnosis</span>
-                    <span id="critique_grade_badge" style="background: rgba(16, 185, 129, 0.2); color: var(--success); padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">A+ (Peak Execution)</span>
+                    <span id="critique_grade_badge" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">A+ (Peak Execution)</span>
                 </div>
 
                 <div class="reader-output" style="margin-bottom: 1rem;">
                     <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                         <div>
                             <div class="current-sign-label">Overall Form Score</div>
-                            <div id="critique_overall_score" class="current-sign-val" style="color: var(--accent-light);">95.0%</div>
+                            <div id="critique_overall_score" class="current-sign-val" style="color: var(--accent-cyan);">95.0%</div>
                         </div>
                         <div style="text-align: right;">
                             <div class="current-sign-label">Wrist Angle</div>
                             <div id="critique_wrist_angle" style="font-family: var(--font-mono); font-size: 1.25rem; color: var(--text-primary);">-90°</div>
                         </div>
                     </div>
-                    <div id="critique_summary_text" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; font-style: italic;">
+                    <div id="critique_summary_text" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.5rem; font-style: italic;">
                         Outstanding form for Peace / V-Sign! Hand posture aligns closely with master ASL references.
                     </div>
                 </div>
 
-                <!-- Metric Subscore Bars -->
                 <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
                     <div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
@@ -673,55 +784,95 @@
                         </div>
                         <div class="progress-bar"><div id="bar_spatial" class="progress-fill" style="width: 90%;"></div></div>
                     </div>
-                    <div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
-                            <span>Form & Symmetry</span>
-                            <span id="subscore_symmetry">96%</span>
-                        </div>
-                        <div class="progress-bar"><div id="bar_symmetry" class="progress-fill" style="width: 96%;"></div></div>
-                    </div>
                 </div>
 
-                <!-- Detailed Anatomical Finger Flexion Inspector -->
+                <!-- Detailed Finger Flexion Table -->
                 <div style="margin-bottom: 1rem;">
-                    <span class="card-title" style="font-size: 0.75rem; margin-bottom: 0.5rem; display: block;">Anatomical Finger Joint Breakdown</span>
+                    <span class="card-title" style="font-size: 0.72rem; margin-bottom: 0.4rem; display: block;">Anatomical Finger Joint Breakdown</span>
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: var(--text-secondary);">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--border); text-align: left; color: var(--text-muted);">
-                                <th style="padding: 0.4rem;">Finger</th>
-                                <th style="padding: 0.4rem;">Measured</th>
-                                <th style="padding: 0.4rem;">Target</th>
-                                <th style="padding: 0.4rem;">Score</th>
-                                <th style="padding: 0.4rem;">Status</th>
+                                <th style="padding: 0.35rem;">Finger</th>
+                                <th style="padding: 0.35rem;">Measured</th>
+                                <th style="padding: 0.35rem;">Target</th>
+                                <th style="padding: 0.35rem;">Score</th>
+                                <th style="padding: 0.35rem;">Status</th>
                             </tr>
                         </thead>
                         <tbody id="critique_finger_table_body">
-                            <tr><td style="padding:0.4rem;">Thumb</td><td>120°</td><td>120°</td><td>100%</td><td style="color:var(--success);">EXCELLENT</td></tr>
-                            <tr><td style="padding:0.4rem;">Index</td><td>10°</td><td>10°</td><td>100%</td><td style="color:var(--success);">EXCELLENT</td></tr>
-                            <tr><td style="padding:0.4rem;">Middle</td><td>10°</td><td>10°</td><td>100%</td><td style="color:var(--success);">EXCELLENT</td></tr>
-                            <tr><td style="padding:0.4rem;">Ring</td><td>150°</td><td>150°</td><td>100%</td><td style="color:var(--success);">EXCELLENT</td></tr>
-                            <tr><td style="padding:0.4rem;">Pinky</td><td>150°</td><td>150°</td><td>100%</td><td style="color:var(--success);">EXCELLENT</td></tr>
+                            <tr><td style="padding:0.35rem;">Thumb</td><td>120°</td><td>120°</td><td>100%</td><td style="color:var(--accent-emerald);">EXCELLENT</td></tr>
+                            <tr><td style="padding:0.35rem;">Index</td><td>10°</td><td>10°</td><td>100%</td><td style="color:var(--accent-emerald);">EXCELLENT</td></tr>
+                            <tr><td style="padding:0.35rem;">Middle</td><td>10°</td><td>10°</td><td>100%</td><td style="color:var(--accent-emerald);">EXCELLENT</td></tr>
+                            <tr><td style="padding:0.35rem;">Ring</td><td>150°</td><td>150°</td><td>100%</td><td style="color:var(--accent-emerald);">EXCELLENT</td></tr>
+                            <tr><td style="padding:0.35rem;">Pinky</td><td>150°</td><td>150°</td><td>100%</td><td style="color:var(--accent-emerald);">EXCELLENT</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- AI Coach Actionable Advice -->
+                <!-- AI Coach Advice -->
                 <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span class="card-title" style="font-size: 0.75rem; color: var(--accent-light);">💡 AI Coach Actionable Advice</span>
-                        <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="speakCritiqueAdvice()">🔊 Speak Advice</button>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                        <span class="card-title" style="font-size: 0.72rem; color: var(--accent-cyan);">💡 AI Coach Advice</span>
+                        <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.72rem;" onclick="speakCritiqueAdvice()">🔊 Speak Advice</button>
                     </div>
-                    <ul id="critique_advice_list" style="font-size: 0.85rem; color: var(--text-primary); padding-left: 1.25rem; line-height: 1.5;">
+                    <ul id="critique_advice_list" style="font-size: 0.82rem; color: var(--text-primary); padding-left: 1.25rem; line-height: 1.5;">
                         <li>Maintain steady posture and keep hand centered in camera frame.</li>
                     </ul>
                 </div>
             </section>
         </div>
 
+        <!-- SYSTEM 3: Neural NLP Studio -->
+        <div id="system_3_view" class="system-view">
+            <section class="card">
+                <div class="card-header">
+                    <span class="card-title">🎙️ English → Sign Gloss NLP Transformer</span>
+                </div>
+                
+                <div class="input-row" style="margin-bottom: 1rem;">
+                    <input type="text" id="nlp_english_input" class="select-input" style="font-size: 0.95rem; padding: 0.65rem;" value="Where is your house?">
+                    <button class="btn btn-primary" onclick="runTextToGlossNLP()">Translate to Gloss</button>
+                    <button class="btn" onclick="startMicNLPInput()">🎙️ Mic Input</button>
+                </div>
 
+                <div class="reader-output" style="margin-bottom: 1rem;">
+                    <div class="current-sign-label">Target Sign Gloss Sequence</div>
+                    <div id="nlp_gloss_output" class="current-sign-val" style="font-size: 1.2rem; color: var(--accent-cyan);">HOUSE • YOU • WHERE</div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem;">
+                    <span class="card-title" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">Linguistic Rules Enforced:</span>
+                    <ul id="asl_grammar_rules_list" style="font-size: 0.82rem; color: var(--text-secondary); list-style-type: square; padding-left: 1.25rem; line-height: 1.5;">
+                        <li>Copula verb dropped ("is").</li>
+                        <li>WH-question word "WHERE" positioned at sentence end.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <span class="card-title">🤟 Sign Gloss → Natural English Sentence</span>
+                </div>
+
+                <div class="input-row" style="margin-bottom: 1rem;">
+                    <input type="text" id="nlp_gloss_input" class="select-input" style="font-size: 0.95rem; padding: 0.65rem;" value="ME WANT WATER">
+                    <button class="btn btn-primary" onclick="runGlossToEnglishNLP()">Translate to English</button>
+                </div>
+
+                <div class="reader-output" style="margin-bottom: 1rem;">
+                    <div class="current-sign-label">Translated Spoken Sentence</div>
+                    <div id="nlp_english_output" class="current-sign-val" style="font-size: 1.2rem; color: var(--accent-emerald);">I would like some water.</div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button class="btn" onclick="speakNLPEnglishResult()">🔊 Text-to-Speech</button>
+                </div>
+            </section>
+        </div>
 
     </main>
 
+    <!-- JavaScript Application Logic -->
     <script>
         const TOP_25_SIGNS = [
             { id: "HELLO", name: "1. HELLO / OPEN HAND", icon: "🖐️" },
@@ -748,507 +899,292 @@
             { id: "POINT_SELF", name: "22. ME / I", icon: "👉" },
             { id: "POINT_YOU", name: "23. YOU", icon: "👉" },
             { id: "TIME", name: "24. TIME / WRIST TAP", icon: "⌚" },
-            { id: "CLAW", name: "25. WANT / CLAW", icon: "🦅" }
+            { id: "FINISH", name: "25. FINISH / ALL DONE", icon: "👐" }
         ];
 
-        function render25GesturesGrid() {
+        function renderGesturesGrid() {
             const grid = document.getElementById('gestures_grid');
+            if (!grid) return;
             grid.innerHTML = TOP_25_SIGNS.map(s => 
-                `<div class="gesture-item" id="tag_${s.id}">${s.icon} ${s.name}</div>`
+                `<div id="gesture_item_${s.id}" class="gesture-item"><span>${s.icon}</span><span>${s.name}</span></div>`
             ).join('');
         }
-        render25GesturesGrid();
+        renderGesturesGrid();
 
-        function switchSystem(sysId) {
-            currentActiveSystem = sysId;
-            [1, 2, 3, 4].forEach(id => {
-                const view = document.getElementById(`system_${id}_view`);
-                const tab = document.getElementById(`tab_sys${id}`);
-                if (view) view.classList.toggle('active', sysId === id);
-                if (tab) tab.classList.toggle('active', sysId === id);
-            });
-            if (sysId === 2 && !avatarInitialized) init3DAvatar();
-            if (sysId === 4) triggerPoseCritique();
+        function switchSystem(sysNum) {
+            document.querySelectorAll('.system-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            const targetView = document.getElementById(`system_${sysNum}_view`);
+            const targetTab = document.getElementById(`tab_sys${sysNum}`);
+            if (targetView) targetView.classList.add('active');
+            if (targetTab) targetTab.classList.add('active');
+
+            if (sysNum === 2 && !avatarInitialized) {
+                init3DAvatar();
+            }
         }
 
-
-        let isRunning = false;
-        let lastTime = performance.now();
-        let transcript = [];
+        let camera = null;
         let hands = null;
-        let mpCamera = null;
-
-        let consecutiveSign = null;
-        let consecutiveCount = 0;
-
-        const videoEl = document.getElementById('webcam_feed');
-        const canvasEl = document.getElementById('output_canvas');
-        const ctx = canvasEl.getContext('2d');
-        const statusDot = document.getElementById('status_dot');
-        const statusLabel = document.getElementById('status_label');
-        const signValEl = document.getElementById('sign_val');
-        const confFillEl = document.getElementById('conf_fill');
-        const confValEl = document.getElementById('conf_val');
-        const transcriptEl = document.getElementById('transcript_val');
-        const fpsValEl = document.getElementById('fps_val');
-        const landmarksValEl = document.getElementById('landmarks_val');
-        const cameraSelect = document.getElementById('camera_device_select');
-        const ttsToggle = document.getElementById('tts_toggle');
+        let isCameraRunning = false;
+        let frameCount = 0;
+        let lastTime = performance.now();
 
         async function populateCameraDevices() {
             try {
-                await navigator.mediaDevices.getUserMedia({ video: true });
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const videoDevices = devices.filter(d => d.kind === 'videoinput');
-
-                cameraSelect.innerHTML = '';
-                videoDevices.forEach((device, index) => {
-                    const option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.text = device.label || `Camera ${index + 1} (USB/Phone)`;
-                    cameraSelect.appendChild(option);
-                });
-            } catch (err) {
-                console.warn('Camera device notice:', err);
+                const select = document.getElementById('camera_device_select');
+                if (select && videoDevices.length > 0) {
+                    select.innerHTML = videoDevices.map((d, i) => 
+                        `<option value="${d.deviceId}">${d.label || `Camera ${i+1}`}</option>`
+                    ).join('');
+                }
+            } catch(e) {
+                console.warn("Could not enumerate camera devices:", e);
             }
         }
         populateCameraDevices();
 
-        // --- SPATIO-TEMPORAL KINEMATIC CONTEXT SIGN CLASSIFIER ---
-        let landmarkTrajectoryHistory = [];
-
-        function classify25ASLHandSigns(multiLandmarks) {
-            if (!multiLandmarks || multiLandmarks.length === 0) {
-                landmarkTrajectoryHistory = [];
-                return { id: "UNKNOWN", label: "NO HAND DETECTED", conf: 0 };
-            }
-
-            const h1 = multiLandmarks[0];
-            const h2 = multiLandmarks.length > 1 ? multiLandmarks[1] : null;
-
-            // Track sliding 10-frame 3D movement trajectory
-            landmarkTrajectoryHistory.push(h1.map(p => ({ x: p.x, y: p.y, z: p.z || 0 })));
-            if (landmarkTrajectoryHistory.length > 10) {
-                landmarkTrajectoryHistory.shift();
-            }
-
-            // Calculate movement vector (displacement over window)
-            let dx = 0, dy = 0, dz = 0;
-            if (landmarkTrajectoryHistory.length >= 3) {
-                const first = landmarkTrajectoryHistory[0][0]; // Wrist
-                const last = landmarkTrajectoryHistory[landmarkTrajectoryHistory.length - 1][0];
-                dx = last.x - first.x;
-                dy = last.y - first.y;
-                dz = last.z - first.z;
-            }
-
-            const wrist = h1[0];
-            const middleMCP = h1[9];
-            const palmDist = Math.hypot(middleMCP.x - wrist.x, middleMCP.y - wrist.y);
-
-            // TWO-HAND SIGN EVALUATION WITH MOTION CONTEXT
-            if (h2) {
-                const h1Wrist = h1[0], h2Wrist = h2[0];
-                const wristDist = Math.hypot(h1Wrist.x - h2Wrist.x, h1Wrist.y - h2Wrist.y);
-                const index1Tip = h1[8], index2Tip = h2[8];
-                const indexDist = Math.hypot(index1Tip.x - index2Tip.x, index1Tip.y - index2Tip.y);
-
-                if (wristDist < 0.25) {
-                    return { id: "LOVE", label: "LOVE (2-HANDS CROSS)", conf: 99 };
-                }
-                if (indexDist < 0.12) {
-                    return { id: "FRIEND", label: "FRIEND (2-INDEX HOOK)", conf: 98 };
-                }
-                const palmDist2 = Math.hypot(h1[9].x - h2[9].x, h1[9].y - h2[9].y);
-                if (palmDist2 < 0.20) {
-                    return { id: "MORE", label: "MORE (2-HANDS GATHER)", conf: 97 };
-                }
-            }
-
-            // SINGLE HAND EVALUATION WITH SPATIAL LOCATION & MOTION DYNAMICS
-            function isExtended(tipIdx, pipIdx) {
-                const distTip = Math.hypot(h1[tipIdx].x - wrist.x, h1[tipIdx].y - wrist.y);
-                const distPip = Math.hypot(h1[pipIdx].x - wrist.x, h1[pipIdx].y - wrist.y);
-                return distTip > distPip * 1.12;
-            }
-
-            const thumbExt = Math.hypot(h1[4].x - h1[17].x, h1[4].y - h1[17].y) > palmDist * 0.9;
-            const indexExt = isExtended(8, 6);
-            const middleExt = isExtended(12, 10);
-            const ringExt = isExtended(16, 14);
-            const pinkyExt = isExtended(20, 18);
-
-            const handY = wrist.y; // 0.0 top, 1.0 bottom
-
-            // --- CONTEXT & LOCATION-AWARE MATCHING ---
-            
-            // 1. HELLO: Open hand near forehead (y < 0.38) moving outward
-            if (indexExt && middleExt && ringExt && pinkyExt && handY < 0.38 && (Math.abs(dx) > 0.03 || dy > 0.02)) {
-                return { id: "HELLO", label: "HELLO (FOREHEAD OUTWARD)", conf: 98 };
-            }
-            // 2. THANK YOU: Hand near chin (y: 0.25-0.50) moving forward/downward
-            if (indexExt && middleExt && handY >= 0.25 && handY <= 0.50 && dy > 0.03) {
-                return { id: "THANK_YOU", label: "THANK YOU (CHIN OUTWARD)", conf: 97 };
-            }
-            // 3. PLEASE: Flat hand on chest (y > 0.42) moving in circular pattern
-            if (indexExt && middleExt && ringExt && pinkyExt && handY > 0.42 && Math.hypot(dx, dy) > 0.03) {
-                return { id: "PLEASE", label: "PLEASE (CHEST CIRCULAR)", conf: 96 };
-            }
-            // 4. ME / MY: Index finger pointing to self/chest
-            if (indexExt && !middleExt && !ringExt && handY > 0.45 && dx < 0.04) {
-                return { id: "POINT_SELF", label: "ME / MY (CHEST TOUCH)", conf: 95 };
-            }
-            // 5. WHERE: Index finger waving horizontally side-to-side
-            if (indexExt && !middleExt && !ringExt && !pinkyExt && Math.abs(dx) > 0.04) {
-                return { id: "WHERE", label: "WHERE (SIDE-TO-SIDE WAVE)", conf: 96 };
-            }
-
-            // Static Pose Fallbacks
-            if (indexExt && middleExt && ringExt && pinkyExt && thumbExt) {
-                return { id: "HELLO", label: "HELLO / OPEN HAND", conf: 98 };
-            }
-            if (indexExt && middleExt && !ringExt && !pinkyExt) {
-                return { id: "PEACE", label: "PEACE / V-SIGN", conf: 96 };
-            }
-            if (indexExt && pinkyExt && thumbExt && !middleExt && !ringExt) {
-                return { id: "ILY", label: "I LOVE YOU", conf: 99 };
-            }
-            if (!indexExt && !middleExt && !ringExt && !pinkyExt && thumbExt && h1[4].y < h1[2].y) {
-                return { id: "THUMBS_UP", label: "GOOD / THUMBS UP", conf: 97 };
-            }
-            if (!indexExt && !middleExt && !ringExt && !pinkyExt && !thumbExt) {
-                return { id: "YES", label: "YES / FIST", conf: 95 };
-            }
-
-            return { id: "UNKNOWN", label: "HOLD SIGN CLEARLY", conf: 40 };
+        function onLanguageSelectionChange() {
+            const lang = document.getElementById('sign_language_select').value;
+            console.log("Active Sign Language updated to:", lang);
         }
 
-        function isValidAnatomicalHand(landmarks) {
-            if (!landmarks || landmarks.length < 21) return false;
-            const wrist = landmarks[0];
-            const middleMCP = landmarks[9];
-            const palmDist = Math.hypot(middleMCP.x - wrist.x, middleMCP.y - wrist.y);
-            
-            // Allow palm size from 0.02 (far away) to 0.70 (close to camera)
-            if (palmDist < 0.02 || palmDist > 0.70) return false;
+        async function setupMediaPipeHands() {
+            const videoElement = document.getElementById('webcam_feed');
+            const canvasElement = document.getElementById('output_canvas');
+            const canvasCtx = canvasElement.getContext('2d');
 
-            const middleTip = landmarks[12];
-            const fingerLen = Math.hypot(middleTip.x - middleMCP.x, middleTip.y - middleMCP.y);
-            const ratio = fingerLen / (palmDist + 1e-6);
-
-            if (ratio < 0.20 || ratio > 2.2) return false;
-
-            return true;
-        }
-
-        // Initialize MediaPipe with DUAL HAND SUPPORT & Strict Anatomical Confidence
-        function initMediaPipe() {
             hands = new Hands({
-                locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
             });
+
             hands.setOptions({
                 maxNumHands: 2,
                 modelComplexity: 1,
-                minDetectionConfidence: 0.65, // STRICT FALSE-POSITIVE FILTERING
+                minDetectionConfidence: 0.65,
                 minTrackingConfidence: 0.65
             });
-            hands.onResults(onResults);
-        }
 
-        function onResults(results) {
-            const now = performance.now();
-            fpsValEl.innerText = Math.round(1000 / (now - lastTime));
-            lastTime = now;
+            hands.onResults(onHandResults);
 
-            ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            document.getElementById('btn_start').addEventListener('click', async () => {
+                const deviceId = document.getElementById('camera_device_select').value;
+                const constraints = {
+                    video: deviceId && deviceId !== 'default' ? { deviceId: { exact: deviceId } } : true
+                };
 
-            const rawHands = (results.multiHandLandmarks || []).filter(isValidAnatomicalHand);
-
-            if (rawHands.length > 0) {
-                const count = rawHands.length;
-                landmarksValEl.innerText = `${count} Hand${count > 1 ? 's' : ''} Detected`;
-
-                rawHands.forEach((landmarks, idx) => {
-                    const skeletonColor = idx === 0 ? 'rgba(56, 189, 248, 0.85)' : 'rgba(16, 185, 129, 0.85)';
-                    const jointColor = idx === 0 ? '#38bdf8' : '#10b981';
-
-                    drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: skeletonColor, lineWidth: 2.5 });
-                    drawLandmarks(ctx, landmarks, { color: jointColor, lineWidth: 1.5, radius: 3 });
+                camera = new Camera(videoElement, {
+                    onFrame: async () => {
+                        if (isCameraRunning) {
+                            await hands.send({ image: videoElement });
+                        }
+                    },
+                    width: 1280,
+                    height: 720
                 });
 
-                if (rawHands[0]) {
-                    latestLandmarksForCritique = rawHands[0].map(pt => [pt.x, pt.y, pt.z || 0]);
-                    if (currentActiveSystem === 4) {
-                        triggerPoseCritique();
-                    }
-                    if (wsStream && wsStream.readyState === WebSocket.OPEN) {
-                        const flatPts = rawHands[0].flatMap(pt => [pt.x, pt.y, pt.z || 0]);
-                        wsStream.send(JSON.stringify({ type: "stream_sentence", landmarks: flatPts }));
-                    }
+                await camera.start();
+                isCameraRunning = true;
+                document.getElementById('btn_start').style.display = 'none';
+                document.getElementById('btn_stop').style.display = 'inline-flex';
+                document.getElementById('status_dot').classList.add('active');
+                document.getElementById('status_label').innerText = 'Camera Streaming';
+            });
+
+            document.getElementById('btn_stop').addEventListener('click', () => {
+                if (camera) camera.stop();
+                isCameraRunning = false;
+                document.getElementById('btn_start').style.display = 'inline-flex';
+                document.getElementById('btn_stop').style.display = 'none';
+                document.getElementById('status_dot').classList.remove('active');
+                document.getElementById('status_label').innerText = 'Standby';
+            });
+        }
+
+        let streamSequenceBuffer = [];
+
+        function onHandResults(results) {
+            const canvasElement = document.getElementById('output_canvas');
+            const canvasCtx = canvasElement.getContext('2d');
+            
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            // FPS Counter
+            frameCount++;
+            const now = performance.now();
+            if (now - lastTime >= 1000) {
+                document.getElementById('fps_val').innerText = Math.round((frameCount * 1000) / (now - lastTime));
+                frameCount = 0;
+                lastTime = now;
+            }
+
+            const numHands = results.multiHandLandmarks ? results.multiHandLandmarks.length : 0;
+            document.getElementById('landmarks_val').innerText = `${numHands} Hand${numHands !== 1 ? 's' : ''}`;
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const firstHand = results.multiHandLandmarks[0];
+                latestLandmarksForCritique = firstHand.map(pt => [pt.x, pt.y, pt.z]);
+                
+                // Draw skeleton landmarks
+                for (const landmarks of results.multiHandLandmarks) {
+                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#38bdf8', lineWidth: 3 });
+                    drawLandmarks(canvasCtx, landmarks, { color: '#8b5cf6', lineWidth: 1, radius: 4 });
                 }
 
-                const res = classify25ASLHandSigns(rawHands);
-                signValEl.innerText = res.label;
-                signValEl.style.color = res.conf > 70 ? 'var(--text-primary)' : 'var(--text-muted)';
-                confFillEl.style.width = `${res.conf}%`;
-                confValEl.innerText = `${res.conf}%`;
+                // Compute Finger Flexions
+                updateFlexionGauges(firstHand);
 
-                // Highlight active gesture in Grid
-                document.querySelectorAll('.gesture-item').forEach(el => el.classList.remove('active'));
-                if (res.id && res.id !== "UNKNOWN") {
-                    const tagEl = document.getElementById(`tag_${res.id}`);
-                    if (tagEl) tagEl.classList.add('active');
+                // Build landmark sequence tensor [225]
+                const flatLandmarks = [];
+                firstHand.forEach(pt => flatLandmarks.push(pt.x, pt.y, pt.z));
+                while (flatLandmarks.length < 225) flatLandmarks.push(0);
+
+                // Send to WebSocket stream
+                if (wsStream && wsStream.readyState === WebSocket.OPEN) {
+                    wsStream.send(JSON.stringify({ type: "stream_sentence", landmarks: flatLandmarks }));
                 }
 
-                if (res.conf > 70) {
-                    if (consecutiveSign === res.label) {
-                        consecutiveCount++;
-                        if (consecutiveCount >= 2) {
-                            appendWord(res.label.split(' ')[0]);
-                            consecutiveCount = 0;
-                        }
-                    } else {
-                        consecutiveSign = res.label;
-                        consecutiveCount = 1;
-                    }
+                // Run Multi-Lingual Sign Translation Endpoint periodically
+                streamSequenceBuffer.push(flatLandmarks);
+                if (streamSequenceBuffer.length >= 15) {
+                    runMultiLingualTranslation(streamSequenceBuffer);
+                    streamSequenceBuffer = streamSequenceBuffer.slice(-10);
                 }
             } else {
-                landmarksValEl.innerText = "0 Hands";
-                signValEl.innerText = "NO HAND DETECTED";
-                signValEl.style.color = 'var(--text-muted)';
-                confFillEl.style.width = '0%';
-                confValEl.innerText = '0%';
-                consecutiveSign = null;
-                consecutiveCount = 0;
-                document.querySelectorAll('.gesture-item').forEach(el => el.classList.remove('active'));
+                document.getElementById('sign_val').innerText = "NO HAND DETECTED";
+                document.getElementById('sign_val').style.color = "var(--text-muted)";
+                document.getElementById('conf_val').innerText = "0%";
+                document.getElementById('conf_fill').style.width = "0%";
             }
+
+            canvasCtx.restore();
         }
 
-        function speakText(text) {
-            if (!text) return;
-            // Attempt ElevenLabs or immediate WebSpeech fallback
-            speakSentenceElevenLabs(text);
-        }
-
-        function appendWord(word) {
-            if (transcript.length === 0 || transcript[transcript.length - 1] !== word) {
-                transcript.push(word);
-                transcriptEl.innerText = transcript.join(' ');
-                
-                const autoSpeak = document.getElementById('elevenlabs_auto_speak');
-                if (!autoSpeak || autoSpeak.checked) {
-                    speakText(word);
+        async function runMultiLingualTranslation(seqBuffer) {
+            const targetLang = document.getElementById('target_language_select').value;
+            try {
+                const resp = await fetch('/translate_multilingual_sign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sequence: seqBuffer, target_lang: targetLang })
+                });
+                const data = await resp.json();
+                if (data.status === 'success' && data.result) {
+                    const res = data.result;
+                    if (res.translated_text) {
+                        document.getElementById('sign_val').innerText = res.translated_text;
+                        document.getElementById('sign_val').style.color = "var(--text-primary)";
+                        const conf = Math.round((res.sign_language_confidence || 0.95) * 100);
+                        document.getElementById('conf_val').innerText = `${conf}%`;
+                        document.getElementById('conf_fill').style.width = `${conf}%`;
+                    }
                 }
+            } catch(e) {
+                console.warn("Multi-lingual sign translation failed:", e);
             }
+        }
+
+        function calculateAngle3D(a, b, c) {
+            const ba = [a.x - b.x, a.y - b.y, a.z - b.z];
+            const bc = [c.x - b.x, c.y - b.y, c.z - b.z];
+            const dot = ba[0]*bc[0] + ba[1]*bc[1] + ba[2]*bc[2];
+            const normBa = Math.sqrt(ba[0]*ba[0] + ba[1]*ba[1] + ba[2]*ba[2]);
+            const normBc = Math.sqrt(bc[0]*bc[0] + bc[1]*bc[1] + bc[2]*bc[2]);
+            if (normBa < 1e-6 || normBc < 1e-6) return 0;
+            const cosAngle = Math.max(-1, Math.min(1, dot / (normBa * normBc)));
+            return Math.round(180 - (Math.acos(cosAngle) * 180 / Math.PI));
+        }
+
+        function updateFlexionGauges(pts) {
+            if (!pts || pts.length < 21) return;
+            const thumb = calculateAngle3D(pts[2], pts[3], pts[4]);
+            const index = calculateAngle3D(pts[5], pts[6], pts[8]);
+            const middle = calculateAngle3D(pts[9], pts[10], pts[12]);
+            const ring = calculateAngle3D(pts[13], pts[14], pts[16]);
+            const pinky = calculateAngle3D(pts[17], pts[18], pts[20]);
+
+            document.getElementById('flex_thumb').innerText = `${thumb}°`;
+            document.getElementById('flex_index').innerText = `${index}°`;
+            document.getElementById('flex_middle').innerText = `${middle}°`;
+            document.getElementById('flex_ring').innerText = `${ring}°`;
+            document.getElementById('flex_pinky').innerText = `${pinky}°`;
         }
 
         function clearTranscript() {
-            transcript = [];
-            transcriptEl.innerText = 'Perform 1-hand or 2-hand signs in front of your camera...';
-            document.getElementById('live_gloss_chips').innerHTML = '';
+            document.getElementById('transcript_val').innerText = "Perform signs continuously... sentence forms in real-time!";
+            document.getElementById('live_gloss_chips').innerHTML = "";
         }
 
-        function speakSentence() {
-            const text = transcript.join(' ');
-            if (text) speakText(text);
-        }
-
-        // Start USB Camera Stream
-        document.getElementById('btn_start').addEventListener('click', async () => {
-            if (!hands) initMediaPipe();
-            const selectedDeviceId = cameraSelect.value;
-            const constraints = {
-                video: selectedDeviceId !== 'default' ? { deviceId: { exact: selectedDeviceId } } : { width: 640, height: 480 }
-            };
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                videoEl.srcObject = stream;
-                await videoEl.play();
-                videoEl.style.display = 'block';
-
-                canvasEl.width = videoEl.videoWidth || 640;
-                canvasEl.height = videoEl.videoHeight || 480;
-
-                // Start MediaPipe Camera loop with 2-hand support
-                mpCamera = new Camera(videoEl, {
-                    onFrame: async () => {
-                        await hands.send({ image: videoEl });
-                    },
-                    width: 640,
-                    height: 480
-                });
-                await mpCamera.start();
-
-                isRunning = true;
-                statusDot.className = 'status-dot active';
-                statusLabel.innerText = 'USB Dual-Hand Active';
-                document.getElementById('btn_start').style.display = 'none';
-                document.getElementById('btn_stop').style.display = 'inline-flex';
-            } catch (err) {
-                console.warn('Camera access issue:', err);
-                statusDot.className = 'status-dot';
-                statusLabel.innerText = 'Permission / Hardware Error';
-                
-                const errBox = document.getElementById('camera_err_banner') || document.createElement('div');
-                errBox.id = 'camera_err_banner';
-                errBox.style.cssText = 'background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; line-height: 1.4;';
-                errBox.innerHTML = `<strong>⚠️ Camera Access Error:</strong> ${err.message}<br>
-                <span style="font-size: 0.8rem; color: #9ca3af; margin-top: 4px; display: block;">
-                    💡 <strong>How to fix:</strong> Click the 🔒 or 🎥 icon in your browser address bar near <code>http://localhost:8000</code>, set Camera to <strong>"Allow"</strong>, and refresh the page.
-                </span>`;
-                
-                const cardHeader = document.querySelector('#system_1_view .card');
-                if (cardHeader && !document.getElementById('camera_err_banner')) {
-                    cardHeader.insertBefore(errBox, cardHeader.children[1]);
-                }
-            }
-        });
-
-
-        document.getElementById('btn_stop').addEventListener('click', () => {
-            isRunning = false;
-            if (mpCamera) mpCamera.stop();
-            if (videoEl.srcObject) videoEl.srcObject.getTracks().forEach(t => t.stop());
-
-            videoEl.style.display = 'none';
-            statusDot.className = 'status-dot';
-            statusLabel.innerText = 'Standby';
-            document.getElementById('btn_start').style.display = 'inline-flex';
-            document.getElementById('btn_stop').style.display = 'none';
-            signValEl.innerText = "NO HAND DETECTED";
-            confFillEl.style.width = '0%';
-            confValEl.innerText = '0%';
-        });
-
-        // 3D Avatar Init (Phase 2 Upgrade: Skeletal Joint Rig & OrbitControls)
+        // 3D AVATAR RENDERER
         let avatarInitialized = false;
         let scene, camera3D, renderer, controls;
-        let rShoulder, rElbow, rWrist, rFingers = [];
-        let lShoulder, lElbow, lWrist, lFingers = [];
+        let rShoulder, rElbow, rWrist, lShoulder, lElbow, lWrist;
         let avatarPlaybackSpeed = 1.0;
 
-        function createLimbSegment(radiusTop, radiusBottom, height, color) {
-            const group = new THREE.Group();
-            const mat = new THREE.MeshPhongMaterial({ color: color, shininess: 30 });
-            const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 12), mat);
-            mesh.position.y = -height / 2;
-            group.add(mesh);
-            return group;
-        }
-
-        function createFingerJoints(parentHand, offsetX, color) {
-            const joints = [];
-            let currentParent = parentHand;
-            for (let i = 0; i < 3; i++) {
-                const fingerSeg = createLimbSegment(0.012, 0.01, 0.06, color);
-                if (i === 0) fingerSeg.position.set(offsetX, -0.1, 0);
-                else fingerSeg.position.set(0, -0.06, 0);
-                currentParent.add(fingerSeg);
-                joints.push(fingerSeg);
-                currentParent = fingerSeg;
-            }
-            return joints;
-        }
-
         function init3DAvatar() {
-            avatarInitialized = true;
             const container = document.getElementById('avatar_canvas');
-            const width = container.clientWidth || 640;
-            const height = container.clientHeight || 360;
+            if (!container || avatarInitialized) return;
 
+            avatarInitialized = true;
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x050608);
 
-            camera3D = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            camera3D.position.set(0, 1.4, 2.8);
+            camera3D = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera3D.position.set(0, 1.4, 2.5);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
 
-            if (typeof THREE.OrbitControls !== 'undefined') {
-                controls = new THREE.OrbitControls(camera3D, renderer.domElement);
-                controls.enableDamping = true;
-                controls.target.set(0, 1.2, 0);
-            }
+            controls = new THREE.OrbitControls(camera3D, renderer.domElement);
+            controls.target.set(0, 1.2, 0);
+            controls.update();
 
             // Lighting
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-            const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
-            dirLight.position.set(3, 5, 4);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0x38bdf8, 0.9);
+            dirLight.position.set(2, 4, 3);
             scene.add(dirLight);
 
-            const fillLight = new THREE.PointLight(0xa855f7, 0.8, 10);
-            fillLight.position.set(-3, 2, -2);
-            scene.add(fillLight);
+            // Create Avatar Rig
+            const jointMat = new THREE.MeshStandardMaterial({ color: 0x8b5cf6, roughness: 0.3 });
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
 
-            // Materials
-            const bodyMat = new THREE.MeshPhongMaterial({ color: 0x1e293b, flatShading: true });
-            const headMat = new THREE.MeshPhongMaterial({ color: 0xf1f5f9, shininess: 40 });
-            const jointMatColor = 0x38bdf8;
-
-            // Torso & Head
-            const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 0.75, 12), bodyMat);
-            torso.position.y = 1.0;
+            const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.15, 0.7, 16), bodyMat);
+            torso.position.y = 1.1;
             scene.add(torso);
 
-            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.12, 12), bodyMat);
-            neck.position.y = 1.42;
-            scene.add(neck);
-
-            const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 20, 20), headMat);
-            head.position.y = 1.58;
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 20, 20), jointMat);
+            head.position.y = 1.6;
             scene.add(head);
 
-            // Right Arm Rig
+            // Right Arm
             rShoulder = new THREE.Group();
-            rShoulder.position.set(0.28, 1.32, 0);
+            rShoulder.position.set(0.24, 1.35, 0);
             scene.add(rShoulder);
 
-            const rUpperArm = createLimbSegment(0.045, 0.038, 0.35, jointMatColor);
-            rShoulder.add(rUpperArm);
+            const rUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.35, 12), bodyMat);
+            rUpper.position.y = -0.175;
+            rShoulder.add(rUpper);
 
-            rElbow = createLimbSegment(0.038, 0.032, 0.32, jointMatColor);
+            rElbow = new THREE.Group();
             rElbow.position.y = -0.35;
             rShoulder.add(rElbow);
 
-            rWrist = createLimbSegment(0.032, 0.025, 0.1, jointMatColor);
-            rWrist.position.y = -0.32;
+            const rLower = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.3, 12), bodyMat);
+            rLower.position.y = -0.15;
+            rElbow.add(rLower);
+
+            rWrist = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.02), jointMat);
+            rWrist.position.y = -0.34;
             rElbow.add(rWrist);
-
-            const rHandMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.03), headMat);
-            rHandMesh.position.y = -0.05;
-            rWrist.add(rHandMesh);
-
-            [-0.03, -0.01, 0.01, 0.03].forEach(offset => {
-                rFingers.push(createFingerJoints(rHandMesh, offset, jointMatColor));
-            });
-
-            // Left Arm Rig
-            lShoulder = new THREE.Group();
-            lShoulder.position.set(-0.28, 1.32, 0);
-            scene.add(lShoulder);
-
-            const lUpperArm = createLimbSegment(0.045, 0.038, 0.35, jointMatColor);
-            lShoulder.add(lUpperArm);
-
-            lElbow = createLimbSegment(0.038, 0.032, 0.32, jointMatColor);
-            lElbow.position.y = -0.35;
-            lShoulder.add(lElbow);
-
-            lWrist = createLimbSegment(0.032, 0.025, 0.1, jointMatColor);
-            lWrist.position.y = -0.32;
-            lElbow.add(lWrist);
-
-            const lHandMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.03), headMat);
-            lHandMesh.position.y = -0.05;
-            lWrist.add(lHandMesh);
-
-            [-0.03, -0.01, 0.01, 0.03].forEach(offset => {
-                lFingers.push(createFingerJoints(lHandMesh, offset, jointMatColor));
-            });
 
             function animate() {
                 requestAnimationFrame(animate);
@@ -1258,13 +1194,12 @@
             animate();
         }
 
-        // ASL Pose Targets
         const ASL_POSES = {
-            REST: { rShoulder: [0, 0, 0.2], rElbow: [0, 0, 0.1], lShoulder: [0, 0, -0.2], lElbow: [0, 0, -0.1] },
-            HELLO: { rShoulder: [-1.2, 0.4, 1.1], rElbow: [-0.6, 0.3, 0.5], lShoulder: [0, 0, -0.2], lElbow: [0, 0, -0.1] },
-            THANK_YOU: { rShoulder: [-1.4, 0.2, 0.6], rElbow: [-1.2, 0, 0.3], lShoulder: [0, 0, -0.2], lElbow: [0, 0, -0.1] },
-            PEACE: { rShoulder: [-1.1, 0.5, 0.9], rElbow: [-0.8, 0.2, 0.4], lShoulder: [0, 0, -0.2], lElbow: [0, 0, -0.1] },
-            LOVE: { rShoulder: [-0.8, 0.3, 0.6], rElbow: [-1.1, 0, 0.2], lShoulder: [-0.8, -0.3, -0.6], lElbow: [-1.1, 0, -0.2] }
+            REST: { rShoulder: [0, 0, 0.2], rElbow: [0, 0, 0.1] },
+            HELLO: { rShoulder: [-1.2, 0.4, 1.1], rElbow: [-0.6, 0.3, 0.5] },
+            THANK_YOU: { rShoulder: [-1.4, 0.2, 0.6], rElbow: [-1.2, 0, 0.3] },
+            PEACE: { rShoulder: [-1.1, 0.5, 0.9], rElbow: [-0.8, 0.2, 0.4] },
+            LOVE: { rShoulder: [-0.8, 0.3, 0.6], rElbow: [-1.1, 0, 0.2] }
         };
 
         function setAvatarPose(pose) {
@@ -1272,8 +1207,6 @@
             const target = ASL_POSES[pose] || ASL_POSES.REST;
             rShoulder.rotation.set(...target.rShoulder);
             rElbow.rotation.set(...target.rElbow);
-            lShoulder.rotation.set(...target.lShoulder);
-            lElbow.rotation.set(...target.lElbow);
         }
 
         function setAvatarSpeed(speed) {
@@ -1309,7 +1242,24 @@
             }
         }
 
-        // PHASE 3 NLP STUDIO HANDLERS
+        function startMicAvatarInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Speech recognition is not supported in this browser. Try Chrome/Edge!");
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const transcriptText = event.results[0][0].transcript;
+                document.getElementById('avatar_text_input').value = transcriptText;
+                dictateTextTo3DAvatar();
+            };
+        }
+
+        // NLP STUDIO HANDLERS
         async function runTextToGlossNLP() {
             const textVal = document.getElementById('nlp_english_input').value;
             if (!textVal) return;
@@ -1374,7 +1324,6 @@
 
         // UNIVERSAL CRITIQUING AGENT HANDLERS
         let latestLandmarksForCritique = null;
-        let currentActiveSystem = 1;
 
         const POSE_DESCRIPTIONS = {
             "PEACE": "Index and Middle fingers extended straight up, Ring and Pinky curled into palm.",
@@ -1422,14 +1371,14 @@
             const scoreEl = document.getElementById('critique_overall_score');
             if (scoreEl) {
                 scoreEl.innerText = `${data.overall_score}%`;
-                scoreEl.style.color = data.overall_score >= 85 ? 'var(--success)' : (data.overall_score >= 60 ? 'var(--accent-light)' : 'var(--warning)');
+                scoreEl.style.color = data.overall_score >= 85 ? 'var(--accent-emerald)' : (data.overall_score >= 60 ? 'var(--accent-cyan)' : 'var(--accent-amber)');
             }
 
             const gradeEl = document.getElementById('critique_grade_badge');
             if (gradeEl) {
                 gradeEl.innerText = data.grade;
                 gradeEl.style.background = data.overall_score >= 85 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(56, 189, 248, 0.2)';
-                gradeEl.style.color = data.overall_score >= 85 ? 'var(--success)' : 'var(--accent-light)';
+                gradeEl.style.color = data.overall_score >= 85 ? 'var(--accent-emerald)' : 'var(--accent-cyan)';
             }
 
             const wristEl = document.getElementById('critique_wrist_angle');
@@ -1441,7 +1390,6 @@
             const subs = data.subscores || {};
             const flexVal = subs.flexion_accuracy || data.overall_score;
             const spatVal = subs.spatial_precision || data.overall_score;
-            const symmVal = subs.form_symmetry || data.overall_score;
 
             if (document.getElementById('subscore_flexion')) document.getElementById('subscore_flexion').innerText = `${flexVal}%`;
             if (document.getElementById('bar_flexion')) document.getElementById('bar_flexion').style.width = `${flexVal}%`;
@@ -1449,19 +1397,16 @@
             if (document.getElementById('subscore_spatial')) document.getElementById('subscore_spatial').innerText = `${spatVal}%`;
             if (document.getElementById('bar_spatial')) document.getElementById('bar_spatial').style.width = `${spatVal}%`;
 
-            if (document.getElementById('subscore_symmetry')) document.getElementById('subscore_symmetry').innerText = `${symmVal}%`;
-            if (document.getElementById('bar_symmetry')) document.getElementById('bar_symmetry').style.width = `${symmVal}%`;
-
             const tbody = document.getElementById('critique_finger_table_body');
             if (data.finger_breakdown && tbody) {
                 tbody.innerHTML = data.finger_breakdown.map(f => {
-                    const statusColor = f.status === 'EXCELLENT' ? 'var(--success)' : 'var(--warning)';
+                    const statusColor = f.status === 'EXCELLENT' ? 'var(--accent-emerald)' : 'var(--accent-amber)';
                     return `<tr>
-                        <td style="padding:0.4rem; text-transform:capitalize; font-weight:500; color:var(--text-primary);">${f.finger}</td>
-                        <td style="padding:0.4rem;">${f.measured_deg}°</td>
-                        <td style="padding:0.4rem;">${f.target_deg}°</td>
-                        <td style="padding:0.4rem;">${f.score}%</td>
-                        <td style="padding:0.4rem; font-weight:600; color:${statusColor};">${f.status.replace(/_/g, ' ')}</td>
+                        <td style="padding:0.35rem; text-transform:capitalize; font-weight:500; color:var(--text-primary);">${f.finger}</td>
+                        <td style="padding:0.35rem;">${f.measured_deg}°</td>
+                        <td style="padding:0.35rem;">${f.target_deg}°</td>
+                        <td style="padding:0.35rem;">${f.score}%</td>
+                        <td style="padding:0.35rem; font-weight:600; color:${statusColor};">${f.status.replace(/_/g, ' ')}</td>
                     </tr>`;
                 }).join('');
             }
@@ -1487,18 +1432,18 @@
                     const box = document.getElementById('gloss_critique_result_box');
                     box.style.display = 'block';
                     document.getElementById('gloss_critique_verdict').innerText = res.verdict;
-                    document.getElementById('gloss_critique_verdict').style.color = res.grammar_score >= 80 ? 'var(--success)' : 'var(--warning)';
+                    document.getElementById('gloss_critique_verdict').style.color = res.grammar_score >= 80 ? 'var(--accent-emerald)' : 'var(--accent-amber)';
                     document.getElementById('gloss_critique_score').innerText = `${res.grammar_score}%`;
                     
                     let detailsHTML = '';
                     if (res.issues_found && res.issues_found.length > 0) {
-                        detailsHTML += `<div style="color:var(--warning); margin-bottom:0.25rem;">⚠️ Issues: ${res.issues_found.join(' ')}</div>`;
+                        detailsHTML += `<div style="color:var(--accent-amber); margin-bottom:0.25rem;">⚠️ Issues: ${res.issues_found.join(' ')}</div>`;
                     }
                     if (res.suggestions && res.suggestions.length > 0) {
-                        detailsHTML += `<div style="color:var(--accent-light);">💡 Correction: ${res.suggestions.join(' ')}</div>`;
+                        detailsHTML += `<div style="color:var(--accent-cyan);">💡 Correction: ${res.suggestions.join(' ')}</div>`;
                     }
                     if (!detailsHTML) {
-                        detailsHTML = '<div style="color:var(--success);">✅ ASL sentence structure complies with standard Gloss grammar rules.</div>';
+                        detailsHTML = '<div style="color:var(--accent-emerald);">✅ ASL sentence structure complies with standard Gloss grammar rules.</div>';
                     }
                     document.getElementById('gloss_critique_details').innerHTML = detailsHTML;
                 }
@@ -1514,7 +1459,6 @@
             const voiceSelect = document.getElementById('elevenlabs_voice_select');
             const voiceId = voiceSelect ? voiceSelect.value : "21m00Tcm4TlvDq8ikWAM";
             const voiceName = voiceSelect ? voiceSelect.options[voiceSelect.selectedIndex].text.split(' ')[0] : "ElevenLabs";
-            const apiKey = document.getElementById('elevenlabs_api_key_input') ? document.getElementById('elevenlabs_api_key_input').value : "";
 
             const tagEl = document.getElementById('streamer_status_tag');
 
@@ -1522,20 +1466,19 @@
                 if (tagEl) {
                     tagEl.innerText = `🗣️ Speaking (${voiceName})...`;
                     tagEl.style.background = 'rgba(16, 185, 129, 0.2)';
-                    tagEl.style.color = 'var(--success)';
+                    tagEl.style.color = 'var(--accent-emerald)';
                 }
 
                 const resp = await fetch('/tts/elevenlabs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: sentence, voice_id: voiceId, api_key: apiKey })
+                    body: JSON.stringify({ text: sentence, voice_id: voiceId })
                 });
                 const res = await resp.json();
                 
                 if (res.status === 'success' && res.audio_base64) {
                     const audio = new Audio(res.audio_base64);
                     await audio.play().catch(e => {
-                        console.warn("Audio autoplay blocked by browser policy, falling back:", e);
                         if ('speechSynthesis' in window) {
                             window.speechSynthesis.cancel();
                             const u = new SpeechSynthesisUtterance(sentence);
@@ -1543,8 +1486,6 @@
                         }
                     });
                 } else {
-                    // Fallback to Web Speech API
-                    if (res.message) console.log("ElevenLabs notice:", res.message);
                     if ('speechSynthesis' in window) {
                         window.speechSynthesis.cancel();
                         const u = new SpeechSynthesisUtterance(sentence);
@@ -1552,7 +1493,6 @@
                     }
                 }
             } catch(err) {
-                console.error("ElevenLabs request error:", err);
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const u = new SpeechSynthesisUtterance(sentence);
@@ -1563,7 +1503,7 @@
                     if (tagEl) {
                         tagEl.innerText = 'Live Streaming';
                         tagEl.style.background = 'rgba(56, 189, 248, 0.15)';
-                        tagEl.style.color = 'var(--accent-light)';
+                        tagEl.style.color = 'var(--accent-cyan)';
                     }
                 }, 3000);
             }
@@ -1583,7 +1523,7 @@
                         }
                         if (data.glosses && data.glosses.length > 0) {
                             document.getElementById('live_gloss_chips').innerHTML = data.glosses.map(g => 
-                                `<span style="background:rgba(56,189,248,0.2); color:var(--accent-light); padding:0.1rem 0.4rem; border-radius:4px; font-size:0.75rem;">${g}</span>`
+                                `<span style="background:rgba(56,189,248,0.2); color:var(--accent-cyan); padding:0.1rem 0.4rem; border-radius:4px; font-size:0.75rem; font-family:var(--font-mono);">${g}</span>`
                             ).join('');
                         }
                         if (data.is_complete && data.sentence) {
@@ -1598,7 +1538,6 @@
                 console.error("WebSocket Stream initialization failed:", err);
             }
         }
-        initWebSocketStream();
 
         function speakCritiqueAdvice() {
             const adviceEl = document.getElementById('critique_advice_list');
@@ -1610,6 +1549,11 @@
             }
         }
 
+        // Initialize App & MediaPipe
+        window.addEventListener('DOMContentLoaded', () => {
+            setupMediaPipeHands();
+            initWebSocketStream();
+        });
     </script>
 </body>
 </html>
