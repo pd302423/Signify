@@ -1,0 +1,24 @@
+# Vision & Landmark Extraction
+mediapipe>=0.10.0
+opencv-python>=4.8.0
+
+# Core Machine Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+scikit-learn>=1.2.0
+
+# Model Export & Accelerated Inference
+onnx>=1.14.0
+onnxruntime>=1.15.0
+
+# Backend & Web API
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+websockets>=11.0.3
+pydantic>=2.0.0
+
+# Utilities & Visualization
+tqdm>=4.65.0
+matplotlib>=3.7.0
+python-multipart>=0.0.6
