@@ -74,8 +74,24 @@ class CSLRInferenceEngine:
         else:
             tensor_seq = torch.tensor(sequence, dtype=torch.float32).to(self.device)
 
-        res = self.multilingual_transformer.translate_sequence(tensor_seq, target_lang=target_lang)
-        return res
+        cslr_res = self.decode_continuous_sequence(sequence)
+        trans_res = self.multilingual_transformer.translate_sequence(tensor_seq, target_lang=target_lang)
+
+        glosses = cslr_res.get("glosses", [])
+        if glosses:
+            clean_sentence = self.translate_gloss_to_english(glosses)
+        else:
+            clean_sentence = trans_res.get("translated_text", "")
+
+        return {
+            "detected_sign_language": trans_res.get("detected_sign_language", "ASL"),
+            "detected_sign_language_full": trans_res.get("detected_sign_language_full", "American Sign Language"),
+            "sign_language_confidence": trans_res.get("sign_language_confidence", 0.95),
+            "target_spoken_language": target_lang,
+            "translated_text": clean_sentence,
+            "tokens": glosses or trans_res.get("tokens", [])
+        }
+
 
     def translate_text_to_asl_gloss(self, text: str) -> List[str]:
         """

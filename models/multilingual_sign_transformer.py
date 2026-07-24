@@ -53,15 +53,14 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe.unsqueeze(0))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x: [Batch, Time, D_Model]
         return x + self.pe[:, :x.size(1)]
 
 
 class MultiLingualSignTransformer(nn.Module):
     """
     Spatio-Temporal Transformer for Multi-Lingual Sign Language Translation.
-    Accepts 543 3D keypoint features (1,629 dims) or 225-dim landmark features,
-    classifies the source sign language, and decodes target spoken language text.
+    Accepts keypoint sequence features, classifies the source sign language,
+    and decodes target spoken language text without repetitive word looping.
     """
 
     def __init__(
@@ -96,14 +95,12 @@ class MultiLingualSignTransformer(nn.Module):
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_encoder_layers)
         
-        # 1. Sign Language Classifier Head (ASL, BSL, ISL, CSL, DGS)
         self.lang_classifier = nn.Sequential(
             nn.Linear(d_model, 128),
             nn.ReLU(),
             nn.Linear(128, num_sign_languages)
         )
         
-        # 2. Token Embedding & Decoder
         self.token_embedding = nn.Embedding(vocab_size, d_model)
         decoder_layer = nn.TransformerDecoderLayer(
             d_model=d_model,
@@ -119,12 +116,9 @@ class MultiLingualSignTransformer(nn.Module):
         self.id_to_lang = list(SUPPORTED_SIGN_LANGUAGES.keys())
 
     def encode(self, src_seq: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        # src_seq: [Batch, Time, Input_Dim]
         feats = self.spatial_projection(src_seq)
         feats = self.pos_encoder(feats)
         memory = self.encoder(feats)
-        
-        # Mean pooling over time for sign language classification
         pooled = memory.mean(dim=1)
         lang_logits = self.lang_classifier(pooled)
         return memory, lang_logits
@@ -144,11 +138,12 @@ class MultiLingualSignTransformer(nn.Module):
     def translate_sequence(
         self,
         src_seq: torch.Tensor,
-        max_len: int = 20,
+        max_len: int = 10,
         target_lang: str = "en"
     ) -> Dict[str, Any]:
         """
-        Greedy / Autoregressive Translation Decoding from Sign Sequence to Spoken Text.
+        Deduplicated Greedy Decoding from Sign Sequence to Spoken Text.
+        Prevents repetitive word loops (e.g. HAPPY HAPPY HAPPY).
         """
         self.eval()
         with torch.no_grad():
@@ -158,7 +153,6 @@ class MultiLingualSignTransformer(nn.Module):
             pred_lang_idx = torch.argmax(lang_probs).item()
             detected_sign_lang = self.id_to_lang[pred_lang_idx]
             
-            # Start of Sequence token ID
             sos_id = self.vocab.index("<SOS>")
             eos_id = self.vocab.index("<EOS>")
             
@@ -169,15 +163,23 @@ class MultiLingualSignTransformer(nn.Module):
                 prob = F.softmax(out[:, -1, :], dim=-1)
                 next_word_id = torch.argmax(prob, dim=-1).item()
                 
-                if next_word_id == eos_id:
+                if next_word_id == eos_id or (ys.shape[1] > 1 and next_word_id == ys[0, -1].item()):
+                    # Break on EOS or immediate token repetition to avoid loops
                     break
                 ys = torch.cat([ys, torch.tensor([[next_word_id]], dtype=torch.long, device=src_seq.device)], dim=1)
             
             token_ids = ys[0].tolist()[1:]  # Exclude SOS
             words = [self.vocab[i] for i in token_ids if i < len(self.vocab)]
             
-            # Basic multilingual mapping for demonstrative synthesis
-            translation = " ".join([w.replace("_", " ") for w in words if w not in ["<PAD>", "<UNK>", "<SOS>", "<EOS>"]])
+            # Collapse adjacent duplicates
+            unique_tokens = []
+            for w in words:
+                if w not in ["<PAD>", "<UNK>", "<SOS>", "<EOS>"]:
+                    clean_w = w.replace("_", " ")
+                    if not unique_tokens or unique_tokens[-1] != clean_w:
+                        unique_tokens.append(clean_w)
+
+            translation = " ".join(unique_tokens)
             if not translation:
                 translation = "HELLO FRIEND"
 
@@ -187,7 +189,7 @@ class MultiLingualSignTransformer(nn.Module):
                 "sign_language_confidence": round(float(lang_probs[pred_lang_idx]), 4),
                 "target_spoken_language": target_lang,
                 "translated_text": translation,
-                "tokens": words
+                "tokens": unique_tokens
             }
 
 

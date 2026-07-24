@@ -727,8 +727,8 @@
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 for (const landmarks of results.multiHandLandmarks) {
-                    drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#ffffff', lineWidth: 2 });
-                    drawLandmarks(ctx, landmarks, { color: '#888888', lineWidth: 1, radius: 3 });
+                    drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: 'rgba(255, 255, 255, 0.45)', lineWidth: 1 });
+                    drawLandmarks(ctx, landmarks, { color: '#ffffff', lineWidth: 1, radius: 1.5 });
                 }
 
                 const flatPts = [];
@@ -772,7 +772,13 @@
                         document.getElementById('live_conf_text').innerText = `${conf}%`;
 
                         if (res.tokens && res.tokens.length > 0) {
-                            document.getElementById('live_gloss_chips').innerHTML = res.tokens.map(t =>
+                            const uniqueTokens = [];
+                            for (const t of res.tokens) {
+                                if (uniqueTokens.length === 0 || uniqueTokens[uniqueTokens.length - 1] !== t) {
+                                    uniqueTokens.push(t);
+                                }
+                            }
+                            document.getElementById('live_gloss_chips').innerHTML = uniqueTokens.map(t =>
                                 `<span class="gloss-chip">${t}</span>`
                             ).join('');
                         }
@@ -782,6 +788,7 @@
                 console.warn("Live translation request failed:", e);
             }
         }
+
 
         function initWebSocketStream() {
             try {
