@@ -16,18 +16,18 @@ from cslr_model import CSLR_BiLSTM_CTC
 from multilingual_sign_transformer import MultiLingualSignTransformer, SUPPORTED_SIGN_LANGUAGES, SUPPORTED_TARGET_LANGUAGES
 
 GLOSS_VOCAB = [
-    "BLANK", "HELLO", "THANK_YOU", "PLEASE", "YES", "NO", "HELP", "ME",
+    "BLANK", "HELLO", "HI", "TODAY", "LEARN", "THANK_YOU", "PLEASE", "YES", "NO", "HELP", "ME", "MY",
     "YOU", "NAME", "WHAT", "WHERE", "WHY", "HOW", "TIME", "EAT",
     "FOOD", "DRINK", "WATER", "WANT", "MORE", "FINISH", "GO", "COME",
-    "FRIEND", "FAMILY", "HOUSE", "WORK", "SCHOOL", "LEARN", "GOOD", "BAD",
-    "HAPPY", "SAD", "LOVE", "SEE", "HEAR", "UNDERSTAND", "AGAIN", "STOP"
+    "FRIEND", "FAMILY", "HOUSE", "WORK", "SCHOOL", "GOOD", "BAD",
+    "HAPPY", "SAD", "LOVE", "SEE", "HEAR", "UNDERSTAND", "AGAIN", "STOP", "IS", "LOLA"
 ]
 
 LEXICON = {
-    "hello": "HELLO", "hi": "HELLO", "hey": "HELLO",
+    "hello": "HELLO", "hi": "HI", "hey": "HELLO", "today": "TODAY",
     "thank": "THANK_YOU", "thanks": "THANK_YOU",
     "please": "PLEASE", "yes": "YES", "no": "NO",
-    "help": "HELP", "me": "ME", "i": "ME", "my": "ME", "myself": "ME",
+    "help": "HELP", "me": "ME", "i": "ME", "my": "MY", "myself": "ME",
     "you": "YOU", "your": "YOU", "yours": "YOU",
     "name": "NAME", "what": "WHAT", "where": "WHERE", "why": "WHY", "how": "HOW",
     "when": "WHEN", "who": "WHO", "eat": "EAT", "food": "FOOD", "drink": "DRINK",
@@ -35,10 +35,11 @@ LEXICON = {
     "friend": "FRIEND", "family": "FAMILY", "house": "HOUSE", "work": "WORK",
     "school": "SCHOOL", "learn": "LEARN", "sign": "SIGN", "good": "GOOD",
     "bad": "BAD", "happy": "HAPPY", "sad": "SAD", "love": "LOVE", "see": "SEE",
-    "understand": "UNDERSTAND", "again": "AGAIN", "stop": "STOP"
+    "understand": "UNDERSTAND", "again": "AGAIN", "stop": "STOP", "lola": "LOLA"
 }
 
-FILLER_WORDS = {"is", "are", "am", "was", "were", "be", "being", "been", "the", "a", "an", "to", "of", "do", "does", "did"}
+FILLER_WORDS = {"are", "am", "was", "were", "be", "being", "been", "the", "a", "an", "to", "of", "do", "does", "did"}
+
 
 
 class CSLRInferenceEngine:
@@ -52,10 +53,15 @@ class CSLRInferenceEngine:
 
         if os.path.exists(model_path):
             try:
-                self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+                state_dict = torch.load(model_path, map_location=self.device)
+                model_state = self.model.state_dict()
+                filtered_state = {k: v for k, v in state_dict.items() if k in model_state and model_state[k].shape == v.shape}
+                model_state.update(filtered_state)
+                self.model.load_state_dict(model_state)
                 print(f"✅ Loaded CSLR weights from {model_path}")
             except Exception as e:
                 print(f"Notice: CSLR engine initialized with base model ({e})")
+
 
         self.model.eval()
         self.multilingual_transformer.eval()

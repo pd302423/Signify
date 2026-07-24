@@ -31,13 +31,14 @@ SUPPORTED_TARGET_LANGUAGES = {
 
 MULTILINGUAL_VOCAB = [
     "<PAD>", "<UNK>", "<SOS>", "<EOS>",
-    "HELLO", "THANK_YOU", "PLEASE", "YES", "NO", "HELP", "ME", "YOU",
+    "HELLO", "HI", "TODAY", "LEARN", "THANK_YOU", "PLEASE", "YES", "NO", "HELP", "ME", "MY", "YOU",
     "NAME", "WHAT", "WHERE", "WHY", "HOW", "TIME", "EAT", "FOOD",
     "DRINK", "WATER", "WANT", "MORE", "FINISH", "GO", "COME", "FRIEND",
-    "FAMILY", "HOUSE", "WORK", "SCHOOL", "LEARN", "GOOD", "BAD", "HAPPY",
-    "SAD", "LOVE", "SEE", "HEAR", "UNDERSTAND", "AGAIN", "STOP",
+    "FAMILY", "HOUSE", "WORK", "SCHOOL", "GOOD", "BAD", "HAPPY",
+    "SAD", "LOVE", "SEE", "HEAR", "UNDERSTAND", "AGAIN", "STOP", "IS", "LOLA",
     "NAMASTE", "DHANYAVAAD", "NIN_HAO", "XIE_XIE", "HALLO", "DANKE", "HOLA", "GRACIAS"
 ]
+
 
 
 class PositionalEncoding(nn.Module):
