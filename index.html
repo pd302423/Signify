@@ -684,8 +684,9 @@
                 const resp = await fetch('/predict', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ landmarks: seqBuffer[seqBuffer.length - 1] })
+                    body: JSON.stringify({ sequence: seqBuffer })
                 });
+
                 const data = await resp.json();
                 if (data.status === 'success' && data.prediction) {
                     const word = data.prediction.gesture || "UNKNOWN";

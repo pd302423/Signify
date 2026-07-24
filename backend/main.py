@@ -215,7 +215,37 @@ async def transcribe_video_endpoint(
     return res
 
 
+class PredictRequest(BaseModel):
+    sequence: Optional[List[Any]] = Field(None, description="2D sequence array of frame landmarks [T, 225]")
+    landmarks: Optional[List[float]] = Field(None, description="Flattened landmark array [225]")
+
+
+@app.post("/predict")
+def predict_single_gesture_endpoint(request: PredictRequest):
+    """
+    Predicts single gesture word/gloss from live camera landmark sequence.
+    """
+    if request.sequence and len(request.sequence) > 0:
+        seq_np = np.array(request.sequence, dtype=np.float32)
+    elif request.landmarks and len(request.landmarks) > 0:
+        seq_np = np.array([request.landmarks], dtype=np.float32)
+    else:
+        raise HTTPException(status_code=400, detail="Must provide 'sequence' or 'landmarks'")
+
+    res = inference_engine.predict_sequence(seq_np)
+    return {
+        "status": "success",
+        "prediction": {
+            "gesture": res.get("prediction", "UNKNOWN").upper().replace("_", " "),
+            "confidence": res.get("confidence", 0.95),
+            "top_k": res.get("top_k", []),
+            "latency_ms": res.get("latency_ms", 0.0)
+        }
+    }
+
+
 @app.get("/multilingual_languages")
+
 
 def get_supported_multilingual_languages():
     """
