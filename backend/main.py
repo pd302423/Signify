@@ -13,7 +13,7 @@ import os
 import json
 import urllib.request
 import numpy as np
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Response
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Response, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -26,6 +26,7 @@ from inference import SignInferenceEngine
 from cslr_inference import CSLRInferenceEngine, ContinuousSentenceStreamer
 from critiquing_agent import UniversalCritiquingAgent, TARGET_POSE_PROFILES
 from tts_elevenlabs import ElevenLabsTTSService, DEFAULT_VOICES
+from video_transcriber import VideoTranscriber
 
 from multicam_smplx_hand import MultiCameraStereoTriangulator, MANOParametricHandModel
 from easymocap_integration import EasyMocapAdapter
@@ -52,6 +53,8 @@ critiquing_agent = UniversalCritiquingAgent()
 elevenlabs_service = ElevenLabsTTSService()
 multicam_triangulator = MultiCameraStereoTriangulator()
 easymocap_adapter = EasyMocapAdapter()
+video_transcriber = VideoTranscriber(cslr_engine)
+
 
 
 @app.get("/health")
@@ -195,7 +198,25 @@ def translate_multilingual_sign_route(request: MultiLingualSignTranslationReques
     }
 
 
+@app.post("/transcribe_video")
+async def transcribe_video_endpoint(
+    file: UploadFile = File(...),
+    target_lang: str = Query("en", description="Target spoken language code (en, es, hi, zh, de, fr)")
+):
+    """
+    Ingests recorded or uploaded video files (.mp4, .webm, .mov, .avi),
+    extracts frame MediaPipe landmark sequences, and returns AI continuous sentence transcription.
+    """
+    contents = await file.read()
+    ext = os.path.splitext(file.filename)[1] or ".mp4"
+    res = video_transcriber.transcribe_video_bytes(contents, file_extension=ext, target_lang=target_lang)
+    if res.get("status") == "error":
+        raise HTTPException(status_code=400, detail=res.get("message"))
+    return res
+
+
 @app.get("/multilingual_languages")
+
 def get_supported_multilingual_languages():
     """
     Returns supported sign languages (ASL, BSL, ISL, CSL, DGS) and target spoken languages (en, es, hi, zh, de).
