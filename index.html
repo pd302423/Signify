@@ -20,7 +20,6 @@
         :root {
             --bg: #000000;
             --surface: #0a0a0a;
-            --surface-hover: #121212;
             --border: #1e1e1e;
             --border-light: #2e2e2e;
             --text-primary: #ffffff;
@@ -290,12 +289,12 @@
             border-color: #cccccc;
         }
 
-        /* Unified Stream Workspace */
-        .stream-panel {
+        /* Output Displays */
+        .output-panel {
             background: #000000;
             border: 1px solid var(--border);
             border-radius: 4px;
-            padding: 1.25rem;
+            padding: 1.5rem;
             margin-bottom: 1.25rem;
         }
 
@@ -307,39 +306,21 @@
             margin-bottom: 0.5rem;
         }
 
-        .live-sentence-display {
-            font-size: 1.5rem;
+        .word-display {
+            font-size: 2.2rem;
             font-weight: 600;
             letter-spacing: -0.02em;
             color: #ffffff;
-            min-height: 54px;
+            min-height: 60px;
             display: flex;
             align-items: center;
-            line-height: 1.4;
-        }
-
-        .gloss-chips-container {
-            display: flex;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-            margin-top: 0.75rem;
-        }
-
-        .gloss-chip {
-            background: #121212;
-            border: 1px solid var(--border-light);
-            color: #ffffff;
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            padding: 0.25rem 0.55rem;
-            border-radius: 3px;
         }
 
         .confidence-indicator {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-top: 0.75rem;
+            margin-top: 1rem;
         }
 
         .bar-bg {
@@ -363,46 +344,6 @@
             color: var(--text-secondary);
             width: 35px;
             text-align: right;
-        }
-
-        /* Interpreter History Transcript Log */
-        .history-feed-box {
-            background: #000000;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 1rem;
-            margin-bottom: 1.25rem;
-            height: 180px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid #141414;
-            padding-bottom: 0.6rem;
-        }
-
-        .history-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .history-time {
-            font-family: var(--font-mono);
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            margin-bottom: 0.2rem;
-        }
-
-        .history-text {
-            font-size: 0.9rem;
-            color: #ffffff;
-            font-weight: 500;
         }
 
         /* Upload Area Dropzone */
@@ -443,15 +384,15 @@
         </a>
 
         <nav class="nav-tabs">
-            <button id="nav_mode1" class="tab-btn active" onclick="switchMode(1)">Live Translation Stream</button>
-            <button id="nav_mode2" class="tab-btn" onclick="switchMode(2)">Video File Transcriber</button>
+            <button id="nav_mode1" class="tab-btn active" onclick="switchMode(1)">Live Word Reader</button>
+            <button id="nav_mode2" class="tab-btn" onclick="switchMode(2)">Video Sentence Transcriber</button>
             <button id="nav_mode3" class="tab-btn" onclick="switchMode(3)">NLP Studio</button>
         </nav>
     </header>
 
     <main class="container">
 
-        <!-- MODE 1: Live Real-Time Continuous Translation Stream -->
+        <!-- MODE 1: Live Real-Time Single Word Reader -->
         <div id="mode_1_view" class="mode-view active">
             
             <section class="card">
@@ -498,49 +439,37 @@
                 </div>
             </section>
 
-            <!-- Unified Real-Time Translation Stream Panel -->
+            <!-- Mode 1: Single Word Detection Output Card -->
             <section class="card">
                 <div class="card-header">
-                    <span class="card-heading">Live Continuous Translation</span>
-                    <span id="streamer_tag" class="overlay-tag">Active Stream</span>
+                    <span class="card-heading">Single Word Recognition</span>
+                    <span class="overlay-tag">Real-Time</span>
                 </div>
 
-                <div class="stream-panel">
-                    <div class="panel-label">Active Sentence Stream</div>
-                    <div id="live_sentence_display" class="live-sentence-display" style="color: var(--text-muted);">Perform sign language sequence...</div>
+                <div class="output-panel">
+                    <div class="panel-label">Detected Sign Word</div>
+                    <div id="live_word_display" class="word-display" style="color: var(--text-muted);">NO GESTURE DETECTED</div>
 
                     <div class="confidence-indicator">
                         <div class="bar-bg"><div id="live_conf_bar" class="bar-fill"></div></div>
                         <span id="live_conf_text" class="confidence-val">0%</span>
                     </div>
-
-                    <div class="gloss-chips-container" id="live_gloss_chips"></div>
                 </div>
 
-                <!-- Scrolling Transcript History Log -->
-                <div class="card-header" style="margin-bottom:0.5rem;">
-                    <span class="card-heading">Completed Sentence History</span>
-                    <button class="btn" style="padding:0.2rem 0.5rem; font-size:0.7rem;" onclick="clearHistoryLog()">Clear History</button>
-                </div>
-
-                <div class="history-feed-box" id="history_feed_list">
-                    <div style="font-size:0.78rem; color:var(--text-muted); font-style:italic;" id="empty_history_msg">Completed sentences will log here automatically...</div>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
                     <label style="font-size:0.75rem; color:var(--text-secondary); cursor:pointer;">
                         <input type="checkbox" id="auto_speak_checkbox" checked style="accent-color:#ffffff;"> Auto Text-to-Speech
                     </label>
-                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="speakCurrentSentence()">🔊 Speak Sentence</button>
+                    <button class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.78rem;" onclick="speakDetectedWord()">🔊 Speak Word</button>
                 </div>
             </section>
         </div>
 
-        <!-- MODE 2: Recorded / Uploaded Video AI Transcriber -->
+        <!-- MODE 2: Video Sentence Transcriber (Continuous Multi-Word Sentences) -->
         <div id="mode_2_view" class="mode-view">
             <section class="card">
                 <div class="card-header">
-                    <span class="card-heading">Video Input</span>
+                    <span class="card-heading">Video Feed</span>
                     <div class="badge-status">
                         <span id="rec_status_dot" class="status-dot"></span>
                         <span id="rec_status_text">Ready</span>
@@ -580,17 +509,19 @@
                 </div>
             </section>
 
+            <!-- Mode 2: Continuous Video Sentence Transcription Output Card -->
             <section class="card">
                 <div class="card-header">
-                    <span class="card-heading">Video Transcription</span>
+                    <span class="card-heading">Sentence Transcription</span>
+                    <span class="overlay-tag">Full Video CTC</span>
                 </div>
 
-                <div class="stream-panel">
+                <div class="output-panel">
                     <div class="panel-label">Full Sentence Transcription</div>
-                    <div id="video_transcribed_sentence" class="live-sentence-display" style="font-size:1.3rem; color:var(--text-secondary);">Awaiting Video Upload / Recording...</div>
+                    <div id="video_transcribed_sentence" class="word-display" style="font-size:1.3rem; color:var(--text-secondary); line-height:1.4;">Awaiting Video Upload / Recording...</div>
                 </div>
 
-                <div class="stream-panel">
+                <div class="output-panel" style="margin-bottom:1.25rem;">
                     <div class="panel-label">Recognized Gloss Sequence</div>
                     <div id="video_gloss_sequence" style="font-family:var(--font-mono); font-size:0.9rem; color:#ffffff; min-height:30px;">-</div>
                 </div>
@@ -618,9 +549,9 @@
                     <input type="text" id="nlp_text_in" class="select-field" value="Where is your house?">
                     <button class="btn btn-primary" onclick="runTextToGlossNLP()">Translate</button>
                 </div>
-                <div class="stream-panel">
+                <div class="output-panel">
                     <div class="panel-label">Generated Sign Glosses</div>
-                    <div id="nlp_gloss_out" class="live-sentence-display" style="font-size:1.2rem;">HOUSE • YOU • WHERE</div>
+                    <div id="nlp_gloss_out" class="word-display" style="font-size:1.2rem;">HOUSE • YOU • WHERE</div>
                 </div>
             </section>
 
@@ -632,9 +563,9 @@
                     <input type="text" id="nlp_gloss_in" class="select-field" value="ME WANT WATER">
                     <button class="btn btn-primary" onclick="runGlossToTextNLP()">Translate</button>
                 </div>
-                <div class="stream-panel">
+                <div class="output-panel">
                     <div class="panel-label">Translated Spoken Sentence</div>
-                    <div id="nlp_text_out" class="live-sentence-display" style="font-size:1.2rem;">I would like some water.</div>
+                    <div id="nlp_text_out" class="word-display" style="font-size:1.2rem;">I would like some water.</div>
                 </div>
             </section>
         </div>
@@ -656,15 +587,13 @@
             }
         }
 
-        // MODE 1: LIVE CAMERA RECOGNITION & CONTINUOUS STREAM
+        // MODE 1: LIVE CAMERA SINGLE WORD READER
         let camera = null;
         let hands = null;
         let isCamRunning = false;
         let frameCounter = 0;
         let lastFrameTimestamp = performance.now();
         let liveStreamBuffer = [];
-        let wsStream = null;
-        let historyLog = [];
 
         async function setupMediaPipe() {
             hands = new Hands({
@@ -735,127 +664,56 @@
                 results.multiHandLandmarks[0].forEach(pt => flatPts.push(pt.x, pt.y, pt.z));
                 while (flatPts.length < 225) flatPts.push(0);
 
-                if (wsStream && wsStream.readyState === WebSocket.OPEN) {
-                    wsStream.send(JSON.stringify({ type: "stream_sentence", landmarks: flatPts }));
-                }
-
                 liveStreamBuffer.push(flatPts);
-                if (liveStreamBuffer.length >= 15) {
-                    runLiveSignTranslation(liveStreamBuffer);
-                    liveStreamBuffer = liveStreamBuffer.slice(-10);
+                if (liveStreamBuffer.length >= 10) {
+                    runSingleWordInference(liveStreamBuffer);
+                    liveStreamBuffer = liveStreamBuffer.slice(-5);
                 }
             } else {
-                document.getElementById('live_sentence_display').innerText = "Perform sign language sequence...";
-                document.getElementById('live_sentence_display').style.color = "var(--text-muted)";
+                document.getElementById('live_word_display').innerText = "NO GESTURE DETECTED";
+                document.getElementById('live_word_display').style.color = "var(--text-muted)";
                 document.getElementById('live_conf_bar').style.width = "0%";
                 document.getElementById('live_conf_text').innerText = "0%";
             }
             ctx.restore();
         }
 
-        async function runLiveSignTranslation(seqBuffer) {
+        async function runSingleWordInference(seqBuffer) {
             const targetLang = document.getElementById('target_lang_select').value;
             try {
-                const resp = await fetch('/translate_multilingual_sign', {
+                const resp = await fetch('/predict', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sequence: seqBuffer, target_lang: targetLang })
+                    body: JSON.stringify({ landmarks: seqBuffer[seqBuffer.length - 1] })
                 });
                 const data = await resp.json();
-                if (data.status === 'success' && data.result) {
-                    const res = data.result;
-                    if (res.translated_text) {
-                        document.getElementById('live_sentence_display').innerText = res.translated_text;
-                        document.getElementById('live_sentence_display').style.color = "#ffffff";
-                        const conf = Math.round((res.sign_language_confidence || 0.95) * 100);
-                        document.getElementById('live_conf_bar').style.width = `${conf}%`;
-                        document.getElementById('live_conf_text').innerText = `${conf}%`;
+                if (data.status === 'success' && data.prediction) {
+                    const word = data.prediction.gesture || "UNKNOWN";
+                    const conf = Math.round((data.prediction.confidence || 0.9) * 100);
+                    
+                    document.getElementById('live_word_display').innerText = word;
+                    document.getElementById('live_word_display').style.color = "#ffffff";
+                    document.getElementById('live_conf_bar').style.width = `${conf}%`;
+                    document.getElementById('live_conf_text').innerText = `${conf}%`;
 
-                        if (res.tokens && res.tokens.length > 0) {
-                            const uniqueTokens = [];
-                            for (const t of res.tokens) {
-                                if (uniqueTokens.length === 0 || uniqueTokens[uniqueTokens.length - 1] !== t) {
-                                    uniqueTokens.push(t);
-                                }
-                            }
-                            document.getElementById('live_gloss_chips').innerHTML = uniqueTokens.map(t =>
-                                `<span class="gloss-chip">${t}</span>`
-                            ).join('');
-                        }
+                    const autoSpeak = document.getElementById('auto_speak_checkbox');
+                    if (autoSpeak && autoSpeak.checked && word !== "UNKNOWN" && word !== "NO GESTURE DETECTED") {
+                        speakText(word);
                     }
                 }
             } catch(e) {
-                console.warn("Live translation request failed:", e);
+                console.warn("Single word prediction error:", e);
             }
         }
 
-
-        function initWebSocketStream() {
-            try {
-                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                wsStream = new WebSocket(`${protocol}//${window.location.host}/ws/stream`);
-                wsStream.onmessage = (event) => {
-                    const msg = JSON.parse(event.data);
-                    if (msg.type === "sentence_stream") {
-                        const data = msg.data;
-                        if (data.sentence) {
-                            document.getElementById('live_sentence_display').innerText = data.sentence;
-                            document.getElementById('live_sentence_display').style.color = "#ffffff";
-                        }
-                        if (data.glosses && data.glosses.length > 0) {
-                            document.getElementById('live_gloss_chips').innerHTML = data.glosses.map(g => 
-                                `<span class="gloss-chip">${g}</span>`
-                            ).join('');
-                        }
-                        if (data.is_complete && data.sentence) {
-                            logCompletedSentence(data.sentence);
-                            const autoSpeak = document.getElementById('auto_speak_checkbox');
-                            if (autoSpeak && autoSpeak.checked) {
-                                speakSentence(data.sentence);
-                            }
-                        }
-                    }
-                };
-            } catch(e) {
-                console.error("WebSocket initialization error:", e);
+        function speakDetectedWord() {
+            const word = document.getElementById('live_word_display').innerText;
+            if (word && word !== "NO GESTURE DETECTED") {
+                speakText(word);
             }
         }
 
-        function logCompletedSentence(sentenceText) {
-            const emptyMsg = document.getElementById('empty_history_msg');
-            if (emptyMsg) emptyMsg.style.display = 'none';
-
-            const signLang = document.getElementById('sign_lang_select').value;
-            const nowTime = new Date().toLocaleTimeString();
-
-            const itemHTML = `
-                <div class="history-item">
-                    <div>
-                        <div class="history-time">[${signLang}] • ${nowTime}</div>
-                        <div class="history-text">${sentenceText}</div>
-                    </div>
-                    <button class="btn" style="padding:0.2rem 0.5rem; font-size:0.7rem;" onclick="speakSentence('${sentenceText.replace(/'/g, "\\'")}')">🔊</button>
-                </div>
-            `;
-
-            const listContainer = document.getElementById('history_feed_list');
-            listContainer.insertAdjacentHTML('afterbegin', itemHTML);
-        }
-
-        function clearHistoryLog() {
-            document.getElementById('history_feed_list').innerHTML = `
-                <div style="font-size:0.78rem; color:var(--text-muted); font-style:italic;" id="empty_history_msg">Completed sentences will log here automatically...</div>
-            `;
-        }
-
-        function speakCurrentSentence() {
-            const text = document.getElementById('live_sentence_display').innerText;
-            if (text && !text.includes("Perform sign")) {
-                speakSentence(text);
-            }
-        }
-
-        function speakSentence(text) {
+        function speakText(text) {
             if (text && 'speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const u = new SpeechSynthesisUtterance(text);
@@ -863,7 +721,7 @@
             }
         }
 
-        // MODE 2: RECORDED / UPLOADED VIDEO TRANSCRIBER
+        // MODE 2: RECORDED / UPLOADED VIDEO SENTENCE TRANSCRIBER
         let mediaRecorder = null;
         let recordedChunks = [];
         let recordedBlob = null;
@@ -939,7 +797,7 @@
             const formData = new FormData();
             formData.append('file', recordedBlob, recordedBlob.name || 'recorded_sign.webm');
 
-            document.getElementById('video_transcribed_sentence').innerText = "Transcribing Video Sequence...";
+            document.getElementById('video_transcribed_sentence').innerText = "Transcribing Video Sentence...";
             document.getElementById('video_transcribed_sentence').style.color = "var(--text-secondary)";
 
             try {
@@ -950,7 +808,7 @@
                 const data = await resp.json();
 
                 if (resp.status === 200 && data.status === 'success') {
-                    document.getElementById('video_transcribed_sentence').innerText = data.sentence || "No speech sentence generated";
+                    document.getElementById('video_transcribed_sentence').innerText = data.sentence || "No sentence generated";
                     document.getElementById('video_transcribed_sentence').style.color = "#ffffff";
                     document.getElementById('video_gloss_sequence').innerText = (data.recognized_glosses || []).join(' • ') || "-";
                     document.getElementById('video_frames_count').innerText = data.frame_count || 0;
@@ -968,7 +826,7 @@
         function speakVideoTranscription() {
             const text = document.getElementById('video_transcribed_sentence').innerText;
             if (text && !text.includes("Transcribing") && 'speechSynthesis' in window) {
-                speakSentence(text);
+                speakText(text);
             }
         }
 
@@ -1009,7 +867,6 @@
         // Init App
         window.addEventListener('DOMContentLoaded', () => {
             setupMediaPipe();
-            initWebSocketStream();
         });
     </script>
 </body>
